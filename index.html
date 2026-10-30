@@ -674,4 +674,14 @@
 
         async function handleRun() {
             if (gameState.isBusy) return;
-            playRetroSF
+            playRetroSFX('click');
+            await typeWriter("¡Escapaste sin problemas! 🏃💨");
+            gameState.isBusy = true;
+        }
+
+        window.onload = function() {
+            renderSelectionMenu();
+        };
+    </script>
+</body>
+</html>
