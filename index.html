@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Retro Pixel Edition</title>
+    <title>Pokémon Battle Simulator - Selección y Batalla</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
-        /* Pixel-art rendering */
         * {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
@@ -25,7 +24,6 @@
             font-family: 'VT323', monospace;
         }
 
-        /* GBA / Retro UI Box styling */
         .gba-box {
             background: #282c3c;
             border: 4px solid #e2e8f0;
@@ -50,7 +48,6 @@
             border-radius: 4px;
         }
 
-        /* Scanlines overlay effect */
         .scanlines {
             position: relative;
             overflow: hidden;
@@ -66,7 +63,6 @@
             pointer-events: none;
         }
 
-        /* Pixel HP Bar */
         .pixel-hp-container {
             background-color: #334155;
             border: 2px solid #0f172a;
@@ -78,11 +74,12 @@
             transition: width 0.4s steps(10, end), background-color 0.4s ease;
         }
 
-        /* Type Colors */
         .type-electric { background-color: #f59e0b; color: #000; border-color: #b45309; }
         .type-normal { background-color: #9ca3af; color: #000; border-color: #4b5563; }
-        .type-steel { background-color: #64748b; color: #fff; border-color: #334155; }
+        .type-water { background-color: #3b82f6; color: #fff; border-color: #1d4ed8; }
         .type-fire { background-color: #ef4444; color: #fff; border-color: #991b1b; }
+        .type-grass { background-color: #22c55e; color: #000; border-color: #15803d; }
+        .type-fighting { background-color: #b45309; color: #fff; border-color: #78350f; }
 
         .pixel-sprite {
             image-rendering: pixelated;
@@ -90,7 +87,6 @@
             -ms-interpolation-mode: nearest-neighbor;
         }
 
-        /* Combat Animations */
         @keyframes pixel-float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-4px); }
@@ -133,21 +129,20 @@
         <div class="bg-slate-900 border-b-4 border-slate-800 px-3 py-2 flex items-center justify-between text-[10px]">
             <div class="flex items-center space-x-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-amber-400 font-bold tracking-wider">GAME BOY ADVANCE SIMULATOR</span>
+                <span class="text-amber-400 font-bold tracking-wider">POKÉMON BATTLE SIMULATOR</span>
             </div>
             <button id="bgm-toggle" onclick="toggleMusic()" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded border-2 border-amber-300 transition-all active:translate-y-0.5">
                 🎵 MÚSICA: OFF
             </button>
         </div>
 
-        <!-- PANTALLA DE BATALLA (ARENA PIXELADA ESTILO GBA) -->
-        <div class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-indigo-950 via-sky-900 to-emerald-900 overflow-hidden p-4">
+        <!-- PANTALLA PRINCIPAL / ARENA DE BATALLA -->
+        <div id="battle-screen" class="hidden relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-indigo-950 via-sky-900 to-emerald-900 overflow-hidden p-4">
             
-            <!-- PLATAFORMAS PIXELADAS -->
             <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
             <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
 
-            <!-- CARD ESTADO RIVAL (CHARIZARD) -->
+            <!-- CARD ESTADO RIVAL -->
             <div class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
                     <span id="enemy-name">CHARIZARD</span>
@@ -164,27 +159,19 @@
                 </div>
             </div>
 
-            <!-- SPRITE ANIMADO DE CHARIZARD (RIVAL) -->
+            <!-- SPRITE RIVAL -->
             <div id="enemy-sprite-box" class="absolute top-6 right-12 z-10 animate-pixel-float flex flex-col items-center transition-opacity duration-500">
-                <img id="enemy-sprite" 
-                     src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif" 
-                     alt="Charizard" 
-                     class="w-32 h-32 sm:w-40 sm:h-40 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
+                <img id="enemy-sprite" src="" alt="Enemy" class="w-32 h-32 sm:w-40 sm:h-40 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
-            <!-- POPUP DAÑO RIVAL -->
             <div id="enemy-damage-pop" class="absolute top-16 right-20 text-yellow-300 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
-            <!-- SPRITE ANIMADO DE PIKACHU (ESPALDA JUGADOR) -->
+            <!-- SPRITE JUGADOR -->
             <div id="player-sprite-box" class="absolute bottom-0 left-10 z-10 animate-pixel-float flex flex-col items-center transition-opacity duration-500">
-                <img id="player-sprite" 
-                     src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/25.gif" 
-                     alt="Pikachu Back" 
-                     class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
+                <img id="player-sprite" src="" alt="Player Back" class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
-            <!-- POPUP DAÑO JUGADOR -->
             <div id="player-damage-pop" class="absolute bottom-20 left-20 text-red-400 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
-            <!-- CARD ESTADO JUGADOR (PIKACHU) -->
+            <!-- CARD ESTADO JUGADOR -->
             <div class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
                     <span id="player-name">PIKACHU</span>
@@ -200,7 +187,6 @@
                     <span class="text-sky-600">EXP</span>
                     <span><span id="player-hp-text">120/120</span></span>
                 </div>
-                <!-- Barra EXP -->
                 <div class="w-full bg-slate-300 h-1 mt-0.5 rounded-sm overflow-hidden border border-slate-400">
                     <div class="bg-sky-500 h-full w-3/4"></div>
                 </div>
@@ -208,24 +194,31 @@
 
         </div>
 
-        <!-- SECCIÓN INFERIOR: DIÁLOGOS Y MENÚ DE ACCIONES -->
+        <!-- PANTALLA DE SELECCIÓN DE POKÉMON (NUEVO) -->
+        <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4 flex flex-col justify-center items-center">
+            <h2 class="text-xs sm:text-sm text-amber-400 font-bold mb-3 tracking-widest text-center">ELIGE A TU POKÉMON INICIAL</h2>
+            <div id="pokemon-roster" class="grid grid-cols-3 gap-3 w-full max-w-md">
+                <!-- Se llena por JavaScript -->
+            </div>
+        </div>
+
+        <!-- SECCIÓN INFERIOR: DIÁLOGOS Y MENÚS -->
         <div class="bg-slate-900 border-t-4 border-slate-700 p-2 sm:p-3 min-h-[150px] flex flex-col justify-between">
             
-            <!-- CAJA DE TEXTO CON EFECTO MÁQUINA DE ESCRIBIR -->
             <div id="dialog-box" class="gba-box p-3 text-[10px] sm:text-xs text-slate-100 min-h-[56px] flex items-center leading-relaxed tracking-wider vt323 text-lg">
-                <span id="typewriter-text">¡Un CHARIZARD salvaje apareció!</span>
+                <span id="typewriter-text">¡Bienvenido al simulador de batallas! Elige tu Pokémon.</span>
             </div>
 
-            <!-- MENÚ PRINCIPAL (4 BOTONES CLÁSICOS) -->
-            <div id="main-menu" class="grid grid-cols-2 gap-2 mt-2">
+            <!-- MENÚ PRINCIPAL DE BATALLA -->
+            <div id="main-menu" class="hidden grid-cols-2 gap-2 mt-2">
                 <button onclick="openMoveMenu()" class="py-2.5 bg-red-600 hover:bg-red-500 border-2 border-red-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
                     ⚔️ LUCHAR
                 </button>
                 <button onclick="openBagMenu()" class="py-2.5 bg-amber-600 hover:bg-amber-500 border-2 border-amber-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
                     🎒 MOCHILA
                 </button>
-                <button onclick="openTeamMenu()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
-                    👥 POKÉMON
+                <button onclick="returnToSelection()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
+                    👥 CAMBIAR POKÉMON
                 </button>
                 <button onclick="handleRun()" class="py-2.5 bg-slate-700 hover:bg-slate-600 border-2 border-slate-400 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
                     🏃 HUIR
@@ -234,21 +227,21 @@
 
             <!-- SUB-MENÚ DE MOVIMIENTOS -->
             <div id="moves-menu" class="hidden grid-cols-2 gap-2 mt-2">
-                <button onclick="useMove(0)" class="p-2 type-electric rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
-                    <span class="font-bold">RAYO</span>
+                <button onclick="useMove(0)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span id="move-name-0" class="font-bold">MOV 1</span>
                     <span class="text-[8px] opacity-90">PP <span id="pp-0">15/15</span></span>
                 </button>
-                <button onclick="useMove(1)" class="p-2 type-normal rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
-                    <span class="font-bold">ATAQUE RÁPIDO</span>
-                    <span class="text-[8px] opacity-90">PP <span id="pp-1">30/30</span></span>
+                <button onclick="useMove(1)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span id="move-name-1" class="font-bold">MOV 2</span>
+                    <span class="text-[8px] opacity-90">PP <span id="pp-1">15/15</span></span>
                 </button>
-                <button onclick="useMove(2)" class="p-2 type-steel rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
-                    <span class="font-bold">COLA FÉRREA</span>
+                <button onclick="useMove(2)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span id="move-name-2" class="font-bold">MOV 3</span>
                     <span class="text-[8px] opacity-90">PP <span id="pp-2">15/15</span></span>
                 </button>
-                <button onclick="useMove(3)" class="p-2 type-electric rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
-                    <span class="font-bold">TRUENO</span>
-                    <span class="text-[8px] opacity-90">PP <span id="pp-3">10/10</span></span>
+                <button onclick="useMove(3)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span id="move-name-3" class="font-bold">MOV 4</span>
+                    <span class="text-[8px] opacity-90">PP <span id="pp-3">15/15</span></span>
                 </button>
                 <button onclick="backToMain()" class="col-span-2 py-1.5 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
                     ↩️ VOLVER
@@ -268,16 +261,9 @@
                 </div>
             </div>
 
-            <!-- SUB-MENÚ EQUIPO / REINICIO -->
-            <div id="team-menu" class="hidden flex-col gap-2 mt-2">
-                <div class="flex gap-2">
-                    <button onclick="resetBattle()" class="flex-grow p-2 bg-slate-800 border-2 border-emerald-400 text-emerald-300 text-[9px] rounded text-left flex justify-between items-center">
-                        <span>🔄 REINICIAR COMBATE / NUEVO RIVAL</span>
-                    </button>
-                    <button onclick="backToMain()" class="px-3 py-2 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
-                        VOLVER
-                    </button>
-                </div>
+            <!-- MENÚ INICIAL VACÍO PARA ESPERAR SELECCIÓN -->
+            <div id="empty-menu" class="flex justify-center items-center mt-2">
+                <span class="text-[9px] text-amber-300 animate-pulse">¡Selecciona un Pokémon arriba para comenzar!</span>
             </div>
 
         </div>
@@ -285,37 +271,127 @@
     </div>
 
     <script>
-        // ESTADO DEL JUEGO
-        const gameState = {
-            player: {
+        // BASE DE DATOS DE POKÉMON DISPONIBLES
+        const POKEMON_LIST = [
+            {
+                id: 25,
                 name: "PIKACHU",
-                level: 50,
+                type: "electric",
                 hp: 120,
-                maxHp: 120,
-                potions: 3,
+                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/25.gif",
+                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif",
                 moves: [
-                    { name: "RAYO", power: 40, accuracy: 0.95, pp: 15, maxPp: 15, type: "electric" },
-                    { name: "ATAQUE RÁPIDO", power: 25, accuracy: 1.0, pp: 30, maxPp: 30, type: "normal" },
-                    { name: "COLA FÉRREA", power: 45, accuracy: 0.75, pp: 15, maxPp: 15, type: "steel" },
-                    { name: "TRUENO", power: 65, accuracy: 0.70, pp: 10, maxPp: 10, type: "electric" }
+                    { name: "RAYO", power: 40, accuracy: 0.95, pp: 15, maxPp: 15 },
+                    { name: "ATAQUE RÁPIDO", power: 25, accuracy: 1.0, pp: 30, maxPp: 30 },
+                    { name: "COLA FÉRREA", power: 45, accuracy: 0.75, pp: 15, maxPp: 15 },
+                    { name: "TRUENO", power: 65, accuracy: 0.70, pp: 10, maxPp: 10 }
                 ]
             },
-            enemy: {
+            {
+                id: 6,
                 name: "CHARIZARD",
-                level: 50,
+                type: "fire",
                 hp: 150,
-                maxHp: 150,
+                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/6.gif",
+                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif",
                 moves: [
-                    { name: "LANZALLAMAS", power: 42, type: "fire" },
-                    { name: "GARRA DRAGÓN", power: 32, type: "normal" },
-                    { name: "AIRE AFILADO", power: 28, type: "normal" }
+                    { name: "LANZALLAMAS", power: 45, accuracy: 0.95, pp: 15, maxPp: 15 },
+                    { name: "GARRA DRAGÓN", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "VUELO", power: 50, accuracy: 0.90, pp: 10, maxPp: 10 },
+                    { name: "LLAMARADA", power: 65, accuracy: 0.75, pp: 5, maxPp: 5 }
                 ]
             },
+            {
+                id: 9,
+                name: "BLASTOISE",
+                type: "water",
+                hp: 160,
+                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/9.gif",
+                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif",
+                moves: [
+                    { name: "SURF", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "HIDROBOMBA", power: 65, accuracy: 0.80, pp: 5, maxPp: 5 },
+                    { name: "MORDISCO", power: 30, accuracy: 1.0, pp: 25, maxPp: 25 },
+                    { name: "RAYO HIELO", power: 50, accuracy: 0.95, pp: 10, maxPp: 10 }
+                ]
+            }
+        ];
+
+        let gameState = {
+            player: null,
+            enemy: null,
             isBusy: false,
             bgmPlaying: false
         };
 
-        // SINTETIZADOR BGM & SFX (WEB AUDIO API CHIPTUNE 8-BIT)
+        // RENDERIZAR SELECTOR INICIAL
+        function renderSelectionMenu() {
+            const roster = document.getElementById('pokemon-roster');
+            roster.innerHTML = '';
+            POKEMON_LIST.forEach((p, idx) => {
+                roster.innerHTML += `
+                    <button onclick="selectPokemon(${idx})" class="gba-box p-2 flex flex-col items-center hover:bg-slate-700 active:translate-y-0.5 transition-all">
+                        <img src="${p.spriteFront}" alt="${p.name}" class="w-16 h-16 pixel-sprite mb-1">
+                        <span class="text-[8px] font-bold text-amber-300">${p.name}</span>
+                        <span class="text-[7px] text-slate-400 uppercase">PS: ${p.hp}</span>
+                    </button>
+                `;
+            });
+        }
+
+        async function selectPokemon(index) {
+            playRetroSFX('click');
+            const chosen = POKEMON_LIST[index];
+            
+            // Clonamos el objeto para evitar modificar la plantilla original
+            gameState.player = JSON.parse(JSON.stringify(chosen));
+            
+            // Elegimos un rival aleatorio diferente (o el mismo si se da el caso)
+            let enemyIndex;
+            do {
+                enemyIndex = Math.floor(Math.random() * POKEMON_LIST.length);
+            } while (POKEMON_LIST.length > 1 && POKEMON_LIST[enemyIndex].name === chosen.name);
+            
+            gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
+
+            // Cambiar pantallas
+            document.getElementById('selection-screen').classList.add('hidden');
+            document.getElementById('battle-screen').classList.remove('hidden');
+            document.getElementById('empty-menu').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('main-menu').classList.add('grid');
+
+            // Asignar sprites y datos
+            document.getElementById('player-sprite').src = gameState.player.spriteBack;
+            document.getElementById('enemy-sprite').src = gameState.enemy.spriteFront;
+            
+            document.getElementById('player-name').innerText = gameState.player.name;
+            document.getElementById('enemy-name').innerText = gameState.enemy.name;
+
+            // Configurar botones de movimientos
+            gameState.player.moves.forEach((m, idx) => {
+                document.getElementById(`move-name-${idx}`).innerText = m.name;
+                document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
+            });
+
+            gameState.player.potions = 3;
+            updateUI();
+
+            await typeWriter(`¡Un ${gameState.enemy.name} salvaje apareció! ¡Adelante, ${gameState.player.name}!`);
+        }
+
+        function returnToSelection() {
+            if (gameState.isBusy) return;
+            playRetroSFX('click');
+            document.getElementById('battle-screen').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('grid');
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('empty-menu').classList.remove('hidden');
+            document.getElementById('selection-screen').classList.remove('hidden');
+            typeWriter("Elige a tu Pokémon inicial.");
+        }
+
+        // SINTETIZADOR BGM & SFX
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
         let stepCount = 0;
@@ -391,14 +467,6 @@
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
                 osc.start(now);
                 osc.stop(now + 0.15);
-            } else if (type === 'super-effective') {
-                osc.type = 'square';
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.linearRampToValueAtTime(900, now + 0.25);
-                gain.gain.setValueAtTime(0.2, now);
-                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
-                osc.start(now);
-                osc.stop(now + 0.25);
             } else if (type === 'heal') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(250, now);
@@ -417,7 +485,6 @@
             }
         }
 
-        // MÁQUINA DE ESCRIBIR
         function typeWriter(text) {
             return new Promise((resolve) => {
                 const el = document.getElementById('typewriter-text');
@@ -434,7 +501,6 @@
             });
         }
 
-        // MENÚS Y NAVEGACIÓN
         function openMoveMenu() {
             if (gameState.isBusy) return;
             playRetroSFX('click');
@@ -451,19 +517,10 @@
             document.getElementById('bag-menu').classList.add('flex');
         }
 
-        function openTeamMenu() {
-            if (gameState.isBusy) return;
-            playRetroSFX('click');
-            document.getElementById('main-menu').classList.add('hidden');
-            document.getElementById('team-menu').classList.remove('hidden');
-            document.getElementById('team-menu').classList.add('flex');
-        }
-
         function backToMain() {
             playRetroSFX('click');
             document.getElementById('moves-menu').classList.add('hidden');
             document.getElementById('bag-menu').classList.add('hidden');
-            document.getElementById('team-menu').classList.add('hidden');
             document.getElementById('main-menu').classList.remove('hidden');
         }
 
@@ -478,17 +535,19 @@
         }
 
         function updateUI() {
-            const pPct = Math.max(0, (gameState.player.hp / gameState.player.maxHp) * 100);
+            if (!gameState.player || !gameState.enemy) return;
+
+            const pPct = Math.max(0, (gameState.player.hp / gameState.player.hp) * 100); // Simplificado por ahora
             const playerBar = document.getElementById('player-hp-bar');
             playerBar.style.width = pPct + '%';
             updateHPBarColor(playerBar, pPct);
-            document.getElementById('player-hp-text').innerText = `${gameState.player.hp}/${gameState.player.maxHp}`;
+            document.getElementById('player-hp-text').innerText = `${gameState.player.hp}/${gameState.player.hp}`;
             
-            const ePct = Math.max(0, (gameState.enemy.hp / gameState.enemy.maxHp) * 100);
+            const ePct = Math.max(0, (gameState.enemy.hp / gameState.enemy.hp) * 100);
             const enemyBar = document.getElementById('enemy-hp-bar');
             enemyBar.style.width = ePct + '%';
             updateHPBarColor(enemyBar, ePct);
-            document.getElementById('enemy-hp-text').innerText = `${gameState.enemy.hp}/${gameState.enemy.maxHp}`;
+            document.getElementById('enemy-hp-text').innerText = `${gameState.enemy.hp}/${gameState.enemy.hp}`;
 
             document.getElementById('potion-count').innerText = gameState.player.potions;
 
@@ -505,7 +564,6 @@
             pop.classList.add('damage-pop-text');
         }
 
-        // LÓGICA DE COMBATE
         async function useMove(index) {
             if (gameState.isBusy) return;
             const move = gameState.player.moves[index];
@@ -527,12 +585,10 @@
             playerSprite.classList.remove('anim-attack-player');
 
             if (Math.random() <= move.accuracy) {
-                const isSuper = move.type === 'electric';
-                const baseDmg = move.power + Math.floor(Math.random() * 8);
-                const finalDmg = isSuper ? Math.floor(baseDmg * 1.5) : baseDmg;
+                const finalDmg = move.power + Math.floor(Math.random() * 8);
 
                 gameState.enemy.hp = Math.max(0, gameState.enemy.hp - finalDmg);
-                playRetroSFX(isSuper ? 'super-effective' : 'hit');
+                playRetroSFX('hit');
                 popDamageText('enemy', `-${finalDmg}`);
 
                 const enemySprite = document.getElementById('enemy-sprite');
@@ -540,10 +596,6 @@
                 updateUI();
                 await new Promise(r => setTimeout(r, 400));
                 enemySprite.classList.remove('anim-damage');
-
-                if (isSuper) {
-                    await typeWriter("¡Es súper eficaz!");
-                }
 
                 if (gameState.enemy.hp <= 0) {
                     await new Promise(r => setTimeout(r, 400));
@@ -578,7 +630,7 @@
 
             if (gameState.player.hp <= 0) {
                 await new Promise(r => setTimeout(r, 400));
-                await typeWriter(`¡${gameState.player.name} se debilitó! Te has quedado sin Pokémon... 💀`);
+                await typeWriter(`¡${gameState.player.name} se debilitó! Has perdido el combate... 💀`);
                 document.getElementById('player-sprite-box').style.opacity = '0';
                 return;
             }
@@ -597,12 +649,12 @@
 
             gameState.isBusy = true;
             gameState.player.potions--;
-            gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + 60);
+            gameState.player.hp = Math.min(150, gameState.player.hp + 60);
 
             backToMain();
             playRetroSFX('heal');
             updateUI();
-            await typeWriter(`¡Usaste HIPERPOCIÓN! Restauraste 60 PS a ${gameState.player.name}.`);
+            await typeWriter(`¡Usaste HIPERPOCIÓN! Restauraste PS a ${gameState.player.name}.`);
 
             await new Promise(r => setTimeout(r, 1000));
 
@@ -622,29 +674,4 @@
 
         async function handleRun() {
             if (gameState.isBusy) return;
-            playRetroSFX('click');
-            await typeWriter("¡Escapaste sin problemas! 🏃💨");
-            gameState.isBusy = true;
-        }
-
-        function resetBattle() {
-            gameState.player.hp = gameState.player.maxHp;
-            gameState.enemy.hp = gameState.enemy.maxHp;
-            gameState.player.potions = 3;
-            gameState.player.moves.forEach(m => m.pp = m.maxPp);
-            gameState.isBusy = false;
-
-            document.getElementById('player-sprite-box').style.opacity = '1';
-            document.getElementById('enemy-sprite-box').style.opacity = '1';
-
-            updateUI();
-            backToMain();
-            typeWriter(`¡Un ${gameState.enemy.name} salvaje apareció!`);
-        }
-
-        window.onload = function() {
-            updateUI();
-        };
-    </script>
-</body>
-</html>
+            playRetroSF
