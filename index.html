@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Intro Entrenadores</title>
+    <title>Pokémon Battle Simulator - Intro Entrenadores Gen 5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -112,17 +112,12 @@
         }
         .damage-pop-text { animation: pop-damage 0.8s ease-out forwards; }
 
-        /* Animaciones de entrada para entrenadores */
-        @keyframes slide-in-left {
-            0% { transform: translateX(-150px); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
+        /* Animaciones de entrada para entrenadores en sus plataformas */
+        @keyframes trainer-slide-in {
+            0% { transform: translateY(-30px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
         }
-        @keyframes slide-in-right {
-            0% { transform: translateX(150px); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
-        }
-        .trainer-slide-left { animation: slide-in-left 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
-        .trainer-slide-right { animation: slide-in-right 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
+        .trainer-intro-anim { animation: trainer-slide-in 0.6s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
@@ -147,14 +142,14 @@
             <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
             <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
 
-            <!-- INTRO DE ENTRENADORES (SPRITES) -->
-            <div id="trainer-intro-box" class="absolute inset-0 z-20 flex justify-between items-center px-8 pointer-events-none">
-                <div id="rival-trainer-sprite" class="opacity-0">
-                    <img src="https://play.pokemonshowdown.com/sprites/trainers/lucas.png" alt="Rival Trainer" class="w-28 h-28 sm:w-36 sm:h-36 pixel-sprite drop-shadow-lg">
-                </div>
-                <div id="player-trainer-sprite" class="opacity-0">
-                    <img src="https://play.pokemonshowdown.com/sprites/trainers/dawn.png" alt="Player Trainer" class="w-28 h-28 sm:w-36 sm:h-36 pixel-sprite drop-shadow-lg scale-x-[-1]">
-                </div>
+            <!-- ENTRENADOR RIVAL (FRENTE - ARRIBA A LA DERECHA) -->
+            <div id="rival-trainer-box" class="absolute top-4 right-12 z-20 opacity-0 flex flex-col items-center">
+                <img id="rival-trainer-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/generation-v/black-white/1.png" alt="Rival Trainer" class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
+            </div>
+
+            <!-- ENTRENADOR JUGADOR (ESPALDA - ABAJO A LA IZQUIERDA) -->
+            <div id="player-trainer-box" class="absolute bottom-2 left-10 z-20 opacity-0 flex flex-col items-center">
+                <img id="player-trainer-sprite" src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/trainers/generation-v/black-white/back/1.png" alt="Player Trainer" class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
 
             <!-- CARD ESTADO RIVAL -->
@@ -364,7 +359,7 @@
             
             gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
 
-            // Ocultar selección y mostrar pantalla de combate limpia
+            // Ocultar selección y mostrar pantalla de combate
             document.getElementById('selection-screen').classList.add('hidden');
             document.getElementById('battle-screen').classList.remove('hidden');
             document.getElementById('empty-menu').classList.add('hidden');
@@ -379,30 +374,34 @@
             gameState.player.potions = 3;
             updateUI();
 
-            // CINEMÁTICA DE ENTRENADORES
+            // CINEMÁTICA DE ENTRENADORES EN POSICIÓN CLÁSICA
             gameState.isBusy = true;
-            const rivalTrainer = document.getElementById('rival-trainer-sprite');
-            const playerTrainer = document.getElementById('player-trainer-sprite');
+            const rivalBox = document.getElementById('rival-trainer-box');
+            const playerBox = document.getElementById('player-trainer-box');
 
-            rivalTrainer.classList.add('trainer-slide-left');
-            playerTrainer.classList.add('trainer-slide-right');
+            rivalBox.style.opacity = '1';
+            playerBox.style.opacity = '1';
+            rivalBox.classList.add('trainer-intro-anim');
+            playerBox.classList.add('trainer-intro-anim');
 
             await typeWriter(`¡El Entrenador rival te desafía a un combate!`);
-            await new Promise(r => setTimeout(r, 1500));
+            await new Promise(r => setTimeout(r, 1400));
 
-            // Desvanecer entrenadores y mostrar Pokémon
-            rivalTrainer.style.opacity = '0';
-            playerTrainer.style.opacity = '0';
-            rivalTrainer.classList.remove('trainer-slide-left');
-            playerTrainer.classList.remove('trainer-slide-right');
-
+            // El rival saca su Pokémon
             await typeWriter(`¡El rival envió a ${gameState.enemy.name}!`);
+            rivalBox.style.opacity = '0';
+            rivalBox.classList.remove('trainer-intro-anim');
+            
             document.getElementById('enemy-sprite-box').style.opacity = '1';
             document.getElementById('enemy-card').style.opacity = '1';
             playRetroSFX('hit');
             await new Promise(r => setTimeout(r, 1000));
 
+            // Tú sacas tu Pokémon
             await typeWriter(`¡Adelante, ${gameState.player.name}!`);
+            playerBox.style.opacity = '0';
+            playerBox.classList.remove('trainer-intro-anim');
+
             document.getElementById('player-sprite-box').style.opacity = '1';
             document.getElementById('player-card').style.opacity = '1';
             playRetroSFX('heal');
@@ -425,9 +424,9 @@
             if (gameState.isBusy) return;
             playRetroSFX('click');
             
-            // Reiniciar opacidades de la intro
-            document.getElementById('rival-trainer-sprite').style.opacity = '0';
-            document.getElementById('player-trainer-sprite').style.opacity = '0';
+            // Reiniciar opacidades e intro
+            document.getElementById('rival-trainer-box').style.opacity = '0';
+            document.getElementById('player-trainer-box').style.opacity = '0';
             document.getElementById('enemy-sprite-box').style.opacity = '0';
             document.getElementById('player-sprite-box').style.opacity = '0';
             document.getElementById('enemy-card').style.opacity = '0';
