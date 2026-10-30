@@ -3,13 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Sprites Animados</title>
-    <!-- Tailwind CSS para el diseño de la estructura -->
+    <title>Pokémon Battle Simulator - Retro Pixel Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tipografía Retro de Game Boy -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
+        /* Pixel-art rendering */
+        * {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
         body {
             font-family: 'Press Start 2P', cursive;
             background-color: #0d0e15;
@@ -17,131 +21,630 @@
             user-select: none;
         }
 
-        /* Rendering Pixel-Perfect para que los sprites no se vean borrosos */
-        .pixel-sprite {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            -ms-interpolation-mode: nearest-neighbor;
+        .vt323 {
+            font-family: 'VT323', monospace;
         }
 
-        /* Marco de consola retro */
+        /* GBA / Retro UI Box styling */
+        .gba-box {
+            background: #282c3c;
+            border: 4px solid #e2e8f0;
+            box-shadow: 
+                inset -4px -4px 0px 0px #12151e,
+                inset 4px 4px 0px 0px #475569,
+                0px 6px 0px 0px #000000;
+            border-radius: 4px;
+        }
+
         .gba-box-outer {
             border: 6px solid #1e293b;
             background: #0f172a;
             box-shadow: 0 10px 25px rgba(0,0,0,0.8), inset 0 0 15px rgba(0,0,0,0.5);
         }
 
-        /* Animación sutil de respiración/flotado para el sprite */
+        .gba-status-card {
+            background: #f8fafc;
+            color: #0f172a;
+            border: 3px solid #1e293b;
+            box-shadow: 3px 3px 0px #000000;
+            border-radius: 4px;
+        }
+
+        /* Scanlines overlay effect */
+        .scanlines {
+            position: relative;
+            overflow: hidden;
+        }
+        .scanlines::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 20;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        /* Pixel HP Bar */
+        .pixel-hp-container {
+            background-color: #334155;
+            border: 2px solid #0f172a;
+            padding: 1px;
+            border-radius: 2px;
+        }
+
+        .hp-bar-fill {
+            transition: width 0.4s steps(10, end), background-color 0.4s ease;
+        }
+
+        /* Type Colors */
+        .type-electric { background-color: #f59e0b; color: #000; border-color: #b45309; }
+        .type-normal { background-color: #9ca3af; color: #000; border-color: #4b5563; }
+        .type-steel { background-color: #64748b; color: #fff; border-color: #334155; }
+        .type-fire { background-color: #ef4444; color: #fff; border-color: #991b1b; }
+
+        .pixel-sprite {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            -ms-interpolation-mode: nearest-neighbor;
+        }
+
+        /* Combat Animations */
         @keyframes pixel-float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-4px); }
         }
-        .animate-pixel-float { 
-            animation: pixel-float 2s steps(4, start) infinite; 
-        }
+        .animate-pixel-float { animation: pixel-float 2s steps(4, start) infinite; }
 
-        /* Animación de ataque hacia adelante */
         @keyframes attack-player-slide {
             0% { transform: translate(0, 0); }
             30% { transform: translate(40px, -40px); }
             100% { transform: translate(0, 0); }
         }
-        .anim-attack-player { 
-            animation: attack-player-slide 0.3s steps(5); 
-        }
+        .anim-attack-player { animation: attack-player-slide 0.3s steps(5); }
 
-        /* Animación de ataque del rival */
         @keyframes attack-enemy-slide {
             0% { transform: translate(0, 0); }
             30% { transform: translate(-40px, 40px); }
             100% { transform: translate(0, 0); }
         }
-        .anim-attack-enemy { 
-            animation: attack-enemy-slide 0.3s steps(5); 
-        }
+        .anim-attack-enemy { animation: attack-enemy-slide 0.3s steps(5); }
 
-        /* Parpadeo cuando reciben daño */
         @keyframes damage-flash {
             0%, 100% { opacity: 1; filter: none; }
             25%, 75% { opacity: 0.2; filter: brightness(3) drop-shadow(0 0 10px red); }
         }
-        .anim-damage { 
-            animation: damage-flash 0.35s steps(2); 
+        .anim-damage { animation: damage-flash 0.35s steps(2); }
+
+        @keyframes pop-damage {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
         }
+        .damage-pop-text { animation: pop-damage 0.8s ease-out forwards; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
-    <!-- CONTENEDOR PRINCIPAL GBA -->
+    <!-- CONTENEDOR PRINCIPAL GBA STYLE -->
     <div class="w-full max-w-2xl gba-box-outer rounded-xl overflow-hidden relative shadow-2xl">
         
-        <!-- PANTALLA DE BATALLA -->
-        <div class="relative w-full h-80 bg-gradient-to-b from-indigo-950 via-sky-900 to-emerald-900 overflow-hidden p-4">
-            
-            <!-- PLATAFORMAS DE COMBATE -->
-            <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950"></div>
-            <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950"></div>
+        <!-- BARRA SUPERIOR DE AUDIO Y CONTROL -->
+        <div class="bg-slate-900 border-b-4 border-slate-800 px-3 py-2 flex items-center justify-between text-[10px]">
+            <div class="flex items-center space-x-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-amber-400 font-bold tracking-wider">GAME BOY ADVANCE SIMULATOR</span>
+            </div>
+            <button id="bgm-toggle" onclick="toggleMusic()" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded border-2 border-amber-300 transition-all active:translate-y-0.5">
+                🎵 MÚSICA: OFF
+            </button>
+        </div>
 
-            <!-- SPRITE ANIMADO DEL RIVAL (CHARIZARD) -->
-            <div id="enemy-sprite-box" class="absolute top-6 right-12 z-10 animate-pixel-float">
+        <!-- PANTALLA DE BATALLA (ARENA PIXELADA ESTILO GBA) -->
+        <div class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-indigo-950 via-sky-900 to-emerald-900 overflow-hidden p-4">
+            
+            <!-- PLATAFORMAS PIXELADAS -->
+            <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
+            <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
+
+            <!-- CARD ESTADO RIVAL (CHARIZARD) -->
+            <div class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10">
+                <div class="flex justify-between items-center text-[10px] font-bold mb-1">
+                    <span id="enemy-name">CHARIZARD</span>
+                    <span id="enemy-level" class="text-slate-600">Nv50</span>
+                </div>
+                <div class="flex items-center space-x-1">
+                    <span class="text-[8px] font-black text-amber-600">PS</span>
+                    <div class="w-full pixel-hp-container">
+                        <div id="enemy-hp-bar" class="hp-bar-fill bg-emerald-500 h-2.5 w-full"></div>
+                    </div>
+                </div>
+                <div class="text-[9px] text-right font-bold mt-1 text-slate-700">
+                    <span id="enemy-hp-text">150/150</span>
+                </div>
+            </div>
+
+            <!-- SPRITE ANIMADO DE CHARIZARD (RIVAL) -->
+            <div id="enemy-sprite-box" class="absolute top-6 right-12 z-10 animate-pixel-float flex flex-col items-center transition-opacity duration-500">
                 <img id="enemy-sprite" 
                      src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif" 
                      alt="Charizard" 
-                     class="w-36 h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
+                     class="w-32 h-32 sm:w-40 sm:h-40 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
+            <!-- POPUP DAÑO RIVAL -->
+            <div id="enemy-damage-pop" class="absolute top-16 right-20 text-yellow-300 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
-            <!-- SPRITE ANIMADO DEL JUGADOR (PIKACHU ESPALDA) -->
-            <div id="player-sprite-box" class="absolute bottom-0 left-10 z-10 animate-pixel-float">
+            <!-- SPRITE ANIMADO DE PIKACHU (ESPALDA JUGADOR) -->
+            <div id="player-sprite-box" class="absolute bottom-0 left-10 z-10 animate-pixel-float flex flex-col items-center transition-opacity duration-500">
                 <img id="player-sprite" 
                      src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/25.gif" 
                      alt="Pikachu Back" 
-                     class="w-32 h-32 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
+                     class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
+            </div>
+            <!-- POPUP DAÑO JUGADOR -->
+            <div id="player-damage-pop" class="absolute bottom-20 left-20 text-red-400 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
+
+            <!-- CARD ESTADO JUGADOR (PIKACHU) -->
+            <div class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10">
+                <div class="flex justify-between items-center text-[10px] font-bold mb-1">
+                    <span id="player-name">PIKACHU</span>
+                    <span id="player-level" class="text-slate-600">Nv50</span>
+                </div>
+                <div class="flex items-center space-x-1 mb-1">
+                    <span class="text-[8px] font-black text-amber-600">PS</span>
+                    <div class="w-full pixel-hp-container">
+                        <div id="player-hp-bar" class="hp-bar-fill bg-emerald-500 h-2.5 w-full"></div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-center text-[8px] font-bold text-slate-700">
+                    <span class="text-sky-600">EXP</span>
+                    <span><span id="player-hp-text">120/120</span></span>
+                </div>
+                <!-- Barra EXP -->
+                <div class="w-full bg-slate-300 h-1 mt-0.5 rounded-sm overflow-hidden border border-slate-400">
+                    <div class="bg-sky-500 h-full w-3/4"></div>
+                </div>
             </div>
 
         </div>
 
-        <!-- BOTONES DE PRUEBA DE ANIMACIONES -->
-        <div class="bg-slate-900 border-t-4 border-slate-700 p-4 flex gap-3 justify-center">
-            <button onclick="testAttack('player')" class="px-3 py-2 bg-red-600 hover:bg-red-500 text-[10px] font-bold rounded">
-                ⚡ Atacar con Pikachu
-            </button>
-            <button onclick="testAttack('enemy')" class="px-3 py-2 bg-orange-600 hover:bg-orange-500 text-[10px] font-bold rounded">
-                🔥 Atacar con Charizard
-            </button>
+        <!-- SECCIÓN INFERIOR: DIÁLOGOS Y MENÚ DE ACCIONES -->
+        <div class="bg-slate-900 border-t-4 border-slate-700 p-2 sm:p-3 min-h-[150px] flex flex-col justify-between">
+            
+            <!-- CAJA DE TEXTO CON EFECTO MÁQUINA DE ESCRIBIR -->
+            <div id="dialog-box" class="gba-box p-3 text-[10px] sm:text-xs text-slate-100 min-h-[56px] flex items-center leading-relaxed tracking-wider vt323 text-lg">
+                <span id="typewriter-text">¡Un CHARIZARD salvaje apareció!</span>
+            </div>
+
+            <!-- MENÚ PRINCIPAL (4 BOTONES CLÁSICOS) -->
+            <div id="main-menu" class="grid grid-cols-2 gap-2 mt-2">
+                <button onclick="openMoveMenu()" class="py-2.5 bg-red-600 hover:bg-red-500 border-2 border-red-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
+                    ⚔️ LUCHAR
+                </button>
+                <button onclick="openBagMenu()" class="py-2.5 bg-amber-600 hover:bg-amber-500 border-2 border-amber-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
+                    🎒 MOCHILA
+                </button>
+                <button onclick="openTeamMenu()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
+                    👥 POKÉMON
+                </button>
+                <button onclick="handleRun()" class="py-2.5 bg-slate-700 hover:bg-slate-600 border-2 border-slate-400 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
+                    🏃 HUIR
+                </button>
+            </div>
+
+            <!-- SUB-MENÚ DE MOVIMIENTOS -->
+            <div id="moves-menu" class="hidden grid-cols-2 gap-2 mt-2">
+                <button onclick="useMove(0)" class="p-2 type-electric rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span class="font-bold">RAYO</span>
+                    <span class="text-[8px] opacity-90">PP <span id="pp-0">15/15</span></span>
+                </button>
+                <button onclick="useMove(1)" class="p-2 type-normal rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span class="font-bold">ATAQUE RÁPIDO</span>
+                    <span class="text-[8px] opacity-90">PP <span id="pp-1">30/30</span></span>
+                </button>
+                <button onclick="useMove(2)" class="p-2 type-steel rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span class="font-bold">COLA FÉRREA</span>
+                    <span class="text-[8px] opacity-90">PP <span id="pp-2">15/15</span></span>
+                </button>
+                <button onclick="useMove(3)" class="p-2 type-electric rounded border-2 text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
+                    <span class="font-bold">TRUENO</span>
+                    <span class="text-[8px] opacity-90">PP <span id="pp-3">10/10</span></span>
+                </button>
+                <button onclick="backToMain()" class="col-span-2 py-1.5 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
+                    ↩️ VOLVER
+                </button>
+            </div>
+
+            <!-- SUB-MENÚ MOCHILA -->
+            <div id="bag-menu" class="hidden flex-col gap-2 mt-2">
+                <div class="flex gap-2">
+                    <button onclick="usePotionItem()" class="flex-grow p-2 bg-slate-800 border-2 border-amber-400 text-amber-300 text-[9px] rounded text-left flex justify-between items-center">
+                        <span>🧪 HIPERPOCIÓN</span>
+                        <span>x<span id="potion-count">3</span></span>
+                    </button>
+                    <button onclick="backToMain()" class="px-3 py-2 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
+                        VOLVER
+                    </button>
+                </div>
+            </div>
+
+            <!-- SUB-MENÚ EQUIPO / REINICIO -->
+            <div id="team-menu" class="hidden flex-col gap-2 mt-2">
+                <div class="flex gap-2">
+                    <button onclick="resetBattle()" class="flex-grow p-2 bg-slate-800 border-2 border-emerald-400 text-emerald-300 text-[9px] rounded text-left flex justify-between items-center">
+                        <span>🔄 REINICIAR COMBATE / NUEVO RIVAL</span>
+                    </button>
+                    <button onclick="backToMain()" class="px-3 py-2 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
+                        VOLVER
+                    </button>
+                </div>
+            </div>
+
         </div>
 
     </div>
 
     <script>
-        // Funciones para probar las animaciones con CSS
-        function testAttack(who) {
-            if (who === 'player') {
-                const pSprite = document.getElementById('player-sprite');
-                const eSprite = document.getElementById('enemy-sprite');
+        // ESTADO DEL JUEGO
+        const gameState = {
+            player: {
+                name: "PIKACHU",
+                level: 50,
+                hp: 120,
+                maxHp: 120,
+                potions: 3,
+                moves: [
+                    { name: "RAYO", power: 40, accuracy: 0.95, pp: 15, maxPp: 15, type: "electric" },
+                    { name: "ATAQUE RÁPIDO", power: 25, accuracy: 1.0, pp: 30, maxPp: 30, type: "normal" },
+                    { name: "COLA FÉRREA", power: 45, accuracy: 0.75, pp: 15, maxPp: 15, type: "steel" },
+                    { name: "TRUENO", power: 65, accuracy: 0.70, pp: 10, maxPp: 10, type: "electric" }
+                ]
+            },
+            enemy: {
+                name: "CHARIZARD",
+                level: 50,
+                hp: 150,
+                maxHp: 150,
+                moves: [
+                    { name: "LANZALLAMAS", power: 42, type: "fire" },
+                    { name: "GARRA DRAGÓN", power: 32, type: "normal" },
+                    { name: "AIRE AFILADO", power: 28, type: "normal" }
+                ]
+            },
+            isBusy: false,
+            bgmPlaying: false
+        };
 
-                // Pikachu ataca
-                pSprite.classList.add('anim-attack-player');
-                setTimeout(() => {
-                    pSprite.classList.remove('anim-attack-player');
-                    // Charizard recibe el golpe
-                    eSprite.classList.add('anim-damage');
-                    setTimeout(() => eSprite.classList.remove('anim-damage'), 350);
-                }, 250);
+        // SINTETIZADOR BGM & SFX (WEB AUDIO API CHIPTUNE 8-BIT)
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let bgmInterval = null;
+        let stepCount = 0;
 
+        const fastBass = [130.81, 130.81, 164.81, 130.81, 196.00, 130.81, 164.81, 146.83];
+        const fastMelody = [
+            523.25, 659.25, 783.99, 1046.50, 880.00, 783.99, 659.25, 587.33,
+            659.25, 783.99, 880.00, 1046.50, 1174.66, 1046.50, 880.00, 783.99
+        ];
+
+        function playRetroBGMStep() {
+            if (!gameState.bgmPlaying) return;
+            const now = audioCtx.currentTime;
+
+            const bassOsc = audioCtx.createOscillator();
+            const bassGain = audioCtx.createGain();
+            bassOsc.type = 'square';
+            bassOsc.frequency.setValueAtTime(fastBass[stepCount % fastBass.length], now);
+            bassGain.gain.setValueAtTime(0.03, now);
+            bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+            bassOsc.connect(bassGain);
+            bassGain.connect(audioCtx.destination);
+            bassOsc.start(now);
+            bassOsc.stop(now + 0.09);
+
+            if (stepCount % 2 === 0) {
+                const melOsc = audioCtx.createOscillator();
+                const melGain = audioCtx.createGain();
+                melOsc.type = 'sawtooth';
+                melOsc.frequency.setValueAtTime(fastMelody[(stepCount / 2) % fastMelody.length], now);
+                melGain.gain.setValueAtTime(0.025, now);
+                melGain.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+                melOsc.connect(melGain);
+                melGain.connect(audioCtx.destination);
+                melOsc.start(now);
+                melOsc.stop(now + 0.14);
+            }
+
+            stepCount++;
+        }
+
+        function toggleMusic() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const btn = document.getElementById('bgm-toggle');
+
+            if (gameState.bgmPlaying) {
+                gameState.bgmPlaying = false;
+                clearInterval(bgmInterval);
+                btn.innerText = "🎵 MÚSICA: OFF";
+                btn.className = "px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded border-2 border-amber-300 transition-all active:translate-y-0.5";
             } else {
-                const pSprite = document.getElementById('player-sprite');
-                const eSprite = document.getElementById('enemy-sprite');
-
-                // Charizard ataca
-                eSprite.classList.add('anim-attack-enemy');
-                setTimeout(() => {
-                    eSprite.classList.remove('anim-attack-enemy');
-                    // Pikachu recibe el golpe
-                    pSprite.classList.add('anim-damage');
-                    setTimeout(() => pSprite.classList.remove('anim-damage'), 350);
-                }, 250);
+                gameState.bgmPlaying = true;
+                stepCount = 0;
+                bgmInterval = setInterval(playRetroBGMStep, 100);
+                btn.innerText = "⏸️ MÚSICA: ON";
+                btn.className = "px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded border-2 border-emerald-300 transition-all active:translate-y-0.5";
             }
         }
+
+        function playRetroSFX(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'hit') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.exponentialRampToValueAtTime(20, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'super-effective') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(900, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            } else if (type === 'heal') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.3);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(500, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.04);
+                osc.start(now);
+                osc.stop(now + 0.04);
+            }
+        }
+
+        // MÁQUINA DE ESCRIBIR
+        function typeWriter(text) {
+            return new Promise((resolve) => {
+                const el = document.getElementById('typewriter-text');
+                el.innerText = '';
+                let i = 0;
+                const timer = setInterval(() => {
+                    el.innerText += text.charAt(i);
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(timer);
+                        resolve();
+                    }
+                }, 20);
+            });
+        }
+
+        // MENÚS Y NAVEGACIÓN
+        function openMoveMenu() {
+            if (gameState.isBusy) return;
+            playRetroSFX('click');
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('moves-menu').classList.remove('hidden');
+            document.getElementById('moves-menu').classList.add('grid');
+        }
+
+        function openBagMenu() {
+            if (gameState.isBusy) return;
+            playRetroSFX('click');
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('bag-menu').classList.remove('hidden');
+            document.getElementById('bag-menu').classList.add('flex');
+        }
+
+        function openTeamMenu() {
+            if (gameState.isBusy) return;
+            playRetroSFX('click');
+            document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('team-menu').classList.remove('hidden');
+            document.getElementById('team-menu').classList.add('flex');
+        }
+
+        function backToMain() {
+            playRetroSFX('click');
+            document.getElementById('moves-menu').classList.add('hidden');
+            document.getElementById('bag-menu').classList.add('hidden');
+            document.getElementById('team-menu').classList.add('hidden');
+            document.getElementById('main-menu').classList.remove('hidden');
+        }
+
+        function updateHPBarColor(barElement, percentage) {
+            if (percentage > 50) {
+                barElement.className = "hp-bar-fill bg-emerald-500 h-2.5 w-full";
+            } else if (percentage > 20) {
+                barElement.className = "hp-bar-fill bg-amber-400 h-2.5 w-full";
+            } else {
+                barElement.className = "hp-bar-fill bg-red-600 h-2.5 w-full";
+            }
+        }
+
+        function updateUI() {
+            const pPct = Math.max(0, (gameState.player.hp / gameState.player.maxHp) * 100);
+            const playerBar = document.getElementById('player-hp-bar');
+            playerBar.style.width = pPct + '%';
+            updateHPBarColor(playerBar, pPct);
+            document.getElementById('player-hp-text').innerText = `${gameState.player.hp}/${gameState.player.maxHp}`;
+            
+            const ePct = Math.max(0, (gameState.enemy.hp / gameState.enemy.maxHp) * 100);
+            const enemyBar = document.getElementById('enemy-hp-bar');
+            enemyBar.style.width = ePct + '%';
+            updateHPBarColor(enemyBar, ePct);
+            document.getElementById('enemy-hp-text').innerText = `${gameState.enemy.hp}/${gameState.enemy.maxHp}`;
+
+            document.getElementById('potion-count').innerText = gameState.player.potions;
+
+            gameState.player.moves.forEach((m, idx) => {
+                document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
+            });
+        }
+
+        function popDamageText(target, text) {
+            const pop = document.getElementById(target === 'enemy' ? 'enemy-damage-pop' : 'player-damage-pop');
+            pop.innerText = text;
+            pop.classList.remove('damage-pop-text');
+            void pop.offsetWidth;
+            pop.classList.add('damage-pop-text');
+        }
+
+        // LÓGICA DE COMBATE
+        async function useMove(index) {
+            if (gameState.isBusy) return;
+            const move = gameState.player.moves[index];
+
+            if (move.pp <= 0) {
+                await typeWriter("¡No quedan PP para este movimiento!");
+                return;
+            }
+
+            gameState.isBusy = true;
+            move.pp--;
+            backToMain();
+
+            await typeWriter(`¡${gameState.player.name} usó ${move.name}!`);
+
+            const playerSprite = document.getElementById('player-sprite');
+            playerSprite.classList.add('anim-attack-player');
+            await new Promise(r => setTimeout(r, 250));
+            playerSprite.classList.remove('anim-attack-player');
+
+            if (Math.random() <= move.accuracy) {
+                const isSuper = move.type === 'electric';
+                const baseDmg = move.power + Math.floor(Math.random() * 8);
+                const finalDmg = isSuper ? Math.floor(baseDmg * 1.5) : baseDmg;
+
+                gameState.enemy.hp = Math.max(0, gameState.enemy.hp - finalDmg);
+                playRetroSFX(isSuper ? 'super-effective' : 'hit');
+                popDamageText('enemy', `-${finalDmg}`);
+
+                const enemySprite = document.getElementById('enemy-sprite');
+                enemySprite.classList.add('anim-damage');
+                updateUI();
+                await new Promise(r => setTimeout(r, 400));
+                enemySprite.classList.remove('anim-damage');
+
+                if (isSuper) {
+                    await typeWriter("¡Es súper eficaz!");
+                }
+
+                if (gameState.enemy.hp <= 0) {
+                    await new Promise(r => setTimeout(r, 400));
+                    await typeWriter(`¡El ${gameState.enemy.name} enemigo se debilitó! ¡Ganaste! 🏆`);
+                    document.getElementById('enemy-sprite-box').style.opacity = '0';
+                    return;
+                }
+            } else {
+                await typeWriter(`¡El ataque de ${gameState.player.name} falló!`);
+            }
+
+            await new Promise(r => setTimeout(r, 800));
+
+            // Turno del rival
+            const enemyMove = gameState.enemy.moves[Math.floor(Math.random() * gameState.enemy.moves.length)];
+            await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
+
+            const enemySprite = document.getElementById('enemy-sprite');
+            enemySprite.classList.add('anim-attack-enemy');
+            await new Promise(r => setTimeout(r, 250));
+            enemySprite.classList.remove('anim-attack-enemy');
+
+            const enemyDmg = enemyMove.power + Math.floor(Math.random() * 6);
+            gameState.player.hp = Math.max(0, gameState.player.hp - enemyDmg);
+            playRetroSFX('hit');
+            popDamageText('player', `-${enemyDmg}`);
+
+            playerSprite.classList.add('anim-damage');
+            updateUI();
+            await new Promise(r => setTimeout(r, 400));
+            playerSprite.classList.remove('anim-damage');
+
+            if (gameState.player.hp <= 0) {
+                await new Promise(r => setTimeout(r, 400));
+                await typeWriter(`¡${gameState.player.name} se debilitó! Te has quedado sin Pokémon... 💀`);
+                document.getElementById('player-sprite-box').style.opacity = '0';
+                return;
+            }
+
+            await new Promise(r => setTimeout(r, 600));
+            await typeWriter(`¿Qué debería hacer ${gameState.player.name}?`);
+            gameState.isBusy = false;
+        }
+
+        async function usePotionItem() {
+            if (gameState.isBusy) return;
+            if (gameState.player.potions <= 0) {
+                await typeWriter("¡No quedan Hiperpociones!");
+                return;
+            }
+
+            gameState.isBusy = true;
+            gameState.player.potions--;
+            gameState.player.hp = Math.min(gameState.player.maxHp, gameState.player.hp + 60);
+
+            backToMain();
+            playRetroSFX('heal');
+            updateUI();
+            await typeWriter(`¡Usaste HIPERPOCIÓN! Restauraste 60 PS a ${gameState.player.name}.`);
+
+            await new Promise(r => setTimeout(r, 1000));
+
+            const enemyMove = gameState.enemy.moves[Math.floor(Math.random() * gameState.enemy.moves.length)];
+            await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
+
+            const enemyDmg = enemyMove.power + Math.floor(Math.random() * 6);
+            gameState.player.hp = Math.max(0, gameState.player.hp - enemyDmg);
+            playRetroSFX('hit');
+            popDamageText('player', `-${enemyDmg}`);
+
+            updateUI();
+            await new Promise(r => setTimeout(r, 800));
+            await typeWriter(`¿Qué debería hacer ${gameState.player.name}?`);
+            gameState.isBusy = false;
+        }
+
+        async function handleRun() {
+            if (gameState.isBusy) return;
+            playRetroSFX('click');
+            await typeWriter("¡Escapaste sin problemas! 🏃💨");
+            gameState.isBusy = true;
+        }
+
+        function resetBattle() {
+            gameState.player.hp = gameState.player.maxHp;
+            gameState.enemy.hp = gameState.enemy.maxHp;
+            gameState.player.potions = 3;
+            gameState.player.moves.forEach(m => m.pp = m.maxPp);
+            gameState.isBusy = false;
+
+            document.getElementById('player-sprite-box').style.opacity = '1';
+            document.getElementById('enemy-sprite-box').style.opacity = '1';
+
+            updateUI();
+            backToMain();
+            typeWriter(`¡Un ${gameState.enemy.name} salvaje apareció!`);
+        }
+
+        window.onload = function() {
+            updateUI();
+        };
     </script>
 </body>
 </html>
