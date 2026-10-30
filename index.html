@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Selección y Batalla</title>
+    <title>Pokémon Battle Simulator - Intro Entrenadores</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -74,13 +74,6 @@
             transition: width 0.4s steps(10, end), background-color 0.4s ease;
         }
 
-        .type-electric { background-color: #f59e0b; color: #000; border-color: #b45309; }
-        .type-normal { background-color: #9ca3af; color: #000; border-color: #4b5563; }
-        .type-water { background-color: #3b82f6; color: #fff; border-color: #1d4ed8; }
-        .type-fire { background-color: #ef4444; color: #fff; border-color: #991b1b; }
-        .type-grass { background-color: #22c55e; color: #000; border-color: #15803d; }
-        .type-fighting { background-color: #b45309; color: #fff; border-color: #78350f; }
-
         .pixel-sprite {
             image-rendering: pixelated;
             image-rendering: crisp-edges;
@@ -118,6 +111,18 @@
             100% { opacity: 0; transform: translateY(-30px) scale(1.2); }
         }
         .damage-pop-text { animation: pop-damage 0.8s ease-out forwards; }
+
+        /* Animaciones de entrada para entrenadores */
+        @keyframes slide-in-left {
+            0% { transform: translateX(-150px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slide-in-right {
+            0% { transform: translateX(150px); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+        .trainer-slide-left { animation: slide-in-left 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
+        .trainer-slide-right { animation: slide-in-right 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
@@ -142,8 +147,18 @@
             <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
             <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
 
+            <!-- INTRO DE ENTRENADORES (SPRITES) -->
+            <div id="trainer-intro-box" class="absolute inset-0 z-20 flex justify-between items-center px-8 pointer-events-none">
+                <div id="rival-trainer-sprite" class="opacity-0">
+                    <img src="https://play.pokemonshowdown.com/sprites/trainers/lucas.png" alt="Rival Trainer" class="w-28 h-28 sm:w-36 sm:h-36 pixel-sprite drop-shadow-lg">
+                </div>
+                <div id="player-trainer-sprite" class="opacity-0">
+                    <img src="https://play.pokemonshowdown.com/sprites/trainers/dawn.png" alt="Player Trainer" class="w-28 h-28 sm:w-36 sm:h-36 pixel-sprite drop-shadow-lg scale-x-[-1]">
+                </div>
+            </div>
+
             <!-- CARD ESTADO RIVAL -->
-            <div class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10">
+            <div id="enemy-card" class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
                     <span id="enemy-name">CHARIZARD</span>
                     <span id="enemy-level" class="text-slate-600">Nv50</span>
@@ -159,20 +174,20 @@
                 </div>
             </div>
 
-            <!-- SPRITE RIVAL -->
-            <div id="enemy-sprite-box" class="absolute top-6 right-12 z-10 animate-pixel-float flex flex-col items-center transition-opacity duration-500">
+            <!-- SPRITE RIVAL POKÉMON -->
+            <div id="enemy-sprite-box" class="absolute top-6 right-12 z-10 animate-pixel-float flex flex-col items-center opacity-0 transition-opacity duration-500">
                 <img id="enemy-sprite" src="" alt="Enemy" class="w-32 h-32 sm:w-40 sm:h-40 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
             <div id="enemy-damage-pop" class="absolute top-16 right-20 text-yellow-300 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
-            <!-- SPRITE JUGADOR -->
-            <div id="player-sprite-box" class="absolute bottom-0 left-10 z-10 animate-pixel-float flex flex-col items-center transition-opacity duration-500">
+            <!-- SPRITE JUGADOR POKÉMON -->
+            <div id="player-sprite-box" class="absolute bottom-0 left-10 z-10 animate-pixel-float flex flex-col items-center opacity-0 transition-opacity duration-500">
                 <img id="player-sprite" src="" alt="Player Back" class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
             <div id="player-damage-pop" class="absolute bottom-20 left-20 text-red-400 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
             <!-- CARD ESTADO JUGADOR -->
-            <div class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10">
+            <div id="player-card" class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
                     <span id="player-name">PIKACHU</span>
                     <span id="player-level" class="text-slate-600">Nv50</span>
@@ -194,7 +209,7 @@
 
         </div>
 
-        <!-- PANTALLA DE SELECCIÓN DE POKÉMON (NUEVO) -->
+        <!-- PANTALLA DE SELECCIÓN DE POKÉMON -->
         <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4 flex flex-col justify-center items-center">
             <h2 class="text-xs sm:text-sm text-amber-400 font-bold mb-3 tracking-widest text-center">ELIGE A TU POKÉMON INICIAL</h2>
             <div id="pokemon-roster" class="grid grid-cols-3 gap-3 w-full max-w-md">
@@ -261,7 +276,7 @@
                 </div>
             </div>
 
-            <!-- MENÚ INICIAL VACÍO PARA ESPERAR SELECCIÓN -->
+            <!-- MENÚ INICIAL VACÍO -->
             <div id="empty-menu" class="flex justify-center items-center mt-2">
                 <span class="text-[9px] text-amber-300 animate-pulse">¡Selecciona un Pokémon arriba para comenzar!</span>
             </div>
@@ -271,7 +286,6 @@
     </div>
 
     <script>
-        // BASE DE DATOS DE POKÉMON DISPONIBLES
         const POKEMON_LIST = [
             {
                 id: 25,
@@ -324,7 +338,6 @@
             bgmPlaying: false
         };
 
-        // RENDERIZAR SELECTOR INICIAL
         function renderSelectionMenu() {
             const roster = document.getElementById('pokemon-roster');
             roster.innerHTML = '';
@@ -342,11 +355,8 @@
         async function selectPokemon(index) {
             playRetroSFX('click');
             const chosen = POKEMON_LIST[index];
-            
-            // Clonamos el objeto para evitar modificar la plantilla original
             gameState.player = JSON.parse(JSON.stringify(chosen));
             
-            // Elegimos un rival aleatorio diferente (o el mismo si se da el caso)
             let enemyIndex;
             do {
                 enemyIndex = Math.floor(Math.random() * POKEMON_LIST.length);
@@ -354,19 +364,49 @@
             
             gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
 
-            // Cambiar pantallas
+            // Ocultar selección y mostrar pantalla de combate limpia
             document.getElementById('selection-screen').classList.add('hidden');
             document.getElementById('battle-screen').classList.remove('hidden');
             document.getElementById('empty-menu').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('hidden');
-            document.getElementById('main-menu').classList.add('grid');
-
-            // Asignar sprites y datos
+            
+            // Asignar sprites de Pokémon
             document.getElementById('player-sprite').src = gameState.player.spriteBack;
             document.getElementById('enemy-sprite').src = gameState.enemy.spriteFront;
             
             document.getElementById('player-name').innerText = gameState.player.name;
             document.getElementById('enemy-name').innerText = gameState.enemy.name;
+
+            gameState.player.potions = 3;
+            updateUI();
+
+            // CINEMÁTICA DE ENTRENADORES
+            gameState.isBusy = true;
+            const rivalTrainer = document.getElementById('rival-trainer-sprite');
+            const playerTrainer = document.getElementById('player-trainer-sprite');
+
+            rivalTrainer.classList.add('trainer-slide-left');
+            playerTrainer.classList.add('trainer-slide-right');
+
+            await typeWriter(`¡El Entrenador rival te desafía a un combate!`);
+            await new Promise(r => setTimeout(r, 1500));
+
+            // Desvanecer entrenadores y mostrar Pokémon
+            rivalTrainer.style.opacity = '0';
+            playerTrainer.style.opacity = '0';
+            rivalTrainer.classList.remove('trainer-slide-left');
+            playerTrainer.classList.remove('trainer-slide-right');
+
+            await typeWriter(`¡El rival envió a ${gameState.enemy.name}!`);
+            document.getElementById('enemy-sprite-box').style.opacity = '1';
+            document.getElementById('enemy-card').style.opacity = '1';
+            playRetroSFX('hit');
+            await new Promise(r => setTimeout(r, 1000));
+
+            await typeWriter(`¡Adelante, ${gameState.player.name}!`);
+            document.getElementById('player-sprite-box').style.opacity = '1';
+            document.getElementById('player-card').style.opacity = '1';
+            playRetroSFX('heal');
+            await new Promise(r => setTimeout(r, 1000));
 
             // Configurar botones de movimientos
             gameState.player.moves.forEach((m, idx) => {
@@ -374,15 +414,25 @@
                 document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
             });
 
-            gameState.player.potions = 3;
-            updateUI();
+            document.getElementById('main-menu').classList.remove('hidden');
+            document.getElementById('main-menu').classList.add('grid');
 
-            await typeWriter(`¡Un ${gameState.enemy.name} salvaje apareció! ¡Adelante, ${gameState.player.name}!`);
+            await typeWriter(`¿Qué debería hacer ${gameState.player.name}?`);
+            gameState.isBusy = false;
         }
 
         function returnToSelection() {
             if (gameState.isBusy) return;
             playRetroSFX('click');
+            
+            // Reiniciar opacidades de la intro
+            document.getElementById('rival-trainer-sprite').style.opacity = '0';
+            document.getElementById('player-trainer-sprite').style.opacity = '0';
+            document.getElementById('enemy-sprite-box').style.opacity = '0';
+            document.getElementById('player-sprite-box').style.opacity = '0';
+            document.getElementById('enemy-card').style.opacity = '0';
+            document.getElementById('player-card').style.opacity = '0';
+
             document.getElementById('battle-screen').classList.add('hidden');
             document.getElementById('main-menu').classList.remove('grid');
             document.getElementById('main-menu').classList.add('hidden');
@@ -537,17 +587,17 @@
         function updateUI() {
             if (!gameState.player || !gameState.enemy) return;
 
-            const pPct = Math.max(0, (gameState.player.hp / gameState.player.hp) * 100); // Simplificado por ahora
+            const pPct = Math.max(0, (gameState.player.hp / 120) * 100);
             const playerBar = document.getElementById('player-hp-bar');
             playerBar.style.width = pPct + '%';
             updateHPBarColor(playerBar, pPct);
-            document.getElementById('player-hp-text').innerText = `${gameState.player.hp}/${gameState.player.hp}`;
+            document.getElementById('player-hp-text').innerText = `${gameState.player.hp}/120`;
             
-            const ePct = Math.max(0, (gameState.enemy.hp / gameState.enemy.hp) * 100);
+            const ePct = Math.max(0, (gameState.enemy.hp / 150) * 100);
             const enemyBar = document.getElementById('enemy-hp-bar');
             enemyBar.style.width = ePct + '%';
             updateHPBarColor(enemyBar, ePct);
-            document.getElementById('enemy-hp-text').innerText = `${gameState.enemy.hp}/${gameState.enemy.hp}`;
+            document.getElementById('enemy-hp-text').innerText = `${gameState.enemy.hp}/150`;
 
             document.getElementById('potion-count').innerText = gameState.player.potions;
 
@@ -649,7 +699,7 @@
 
             gameState.isBusy = true;
             gameState.player.potions--;
-            gameState.player.hp = Math.min(150, gameState.player.hp + 60);
+            gameState.player.hp = Math.min(120, gameState.player.hp + 60);
 
             backToMain();
             playRetroSFX('heal');
