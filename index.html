@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Intro Entrenadores</title>
+    <title>Pokémon Battle Simulator - VS Intro Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -18,6 +18,7 @@
             background-color: #0d0e15;
             color: #ffffff;
             user-select: none;
+            overflow: hidden;
         }
 
         .vt323 {
@@ -112,11 +113,30 @@
         }
         .damage-pop-text { animation: pop-damage 0.8s ease-out forwards; }
 
-        @keyframes trainer-slide-in {
-            0% { transform: translateY(-20px); opacity: 0; }
-            100% { transform: translateY(0); opacity: 1; }
+        /* ANIMACIONES PANTALLA VS ESTILO CIBER / POKÉMON */
+        @keyframes slide-left-panel {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(0); }
         }
-        .trainer-intro-anim { animation: trainer-slide-in 0.5s ease-out forwards; }
+        @keyframes slide-right-panel {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(0); }
+        }
+        @keyframes vs-zoom {
+            0% { transform: scale(3); opacity: 0; }
+            60% { transform: scale(0.9); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes pokeball-throw {
+            0% { transform: translate(-100px, 50px) scale(0.2) rotate(0deg); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(0, 0) scale(1) rotate(720deg); opacity: 1; }
+        }
+
+        .anim-vs-left { animation: slide-left-panel 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
+        .anim-vs-right { animation: slide-right-panel 0.5s cubic-bezier(0.1, 0.9, 0.2, 1) forwards; }
+        .anim-vs-logo { animation: vs-zoom 0.4s cubic-bezier(0.1, 1.5, 0.3, 1) forwards; }
+        .anim-pokeball { animation: pokeball-throw 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
@@ -140,16 +160,6 @@
             
             <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
             <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
-
-            <!-- ENTRENADOR RIVAL (FRENTE - ARRIBA A LA DERECHA) -->
-            <div id="rival-trainer-box" class="absolute top-6 right-10 z-20 opacity-0 flex flex-col items-center">
-                <img id="rival-trainer-sprite" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" alt="Rival Trainer" class="w-24 h-24 sm:w-32 sm:h-32 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
-            </div>
-
-            <!-- ENTRENADOR JUGADOR (ESPALDA - ABAJO A LA IZQUIERDA) -->
-            <div id="player-trainer-box" class="absolute bottom-2 left-8 z-20 opacity-0 flex flex-col items-center">
-                <img id="player-trainer-sprite" src="https://play.pokemonshowdown.com/sprites/trainers/ethan.png" alt="Player Trainer" class="w-28 h-28 sm:w-36 sm:h-36 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
-            </div>
 
             <!-- CARD ESTADO RIVAL -->
             <div id="enemy-card" class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
@@ -180,6 +190,10 @@
             </div>
             <div id="player-damage-pop" class="absolute bottom-20 left-20 text-red-400 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
+            <!-- EFECTO DE LANZAMIENTO DE POKÉBALL (ANIMACIÓN) -->
+            <div id="throw-pokeball-enemy" class="absolute top-16 right-32 z-20 opacity-0 text-2xl">🔴</div>
+            <div id="throw-pokeball-player" class="absolute bottom-16 left-32 z-20 opacity-0 text-2xl">🔴</div>
+
             <!-- CARD ESTADO JUGADOR -->
             <div id="player-card" class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
@@ -198,6 +212,34 @@
                 </div>
                 <div class="w-full bg-slate-300 h-1 mt-0.5 rounded-sm overflow-hidden border border-slate-400">
                     <div class="bg-sky-500 h-full w-3/4"></div>
+                </div>
+            </div>
+
+            <!-- OVERLAY DE CINEMÁTICA VS (ESTILO PANTALLA DIVIDIDA DE UN SOLO COLOR/TONO) -->
+            <div id="vs-intro-overlay" class="absolute inset-0 z-30 pointer-events-none hidden overflow-hidden flex items-center justify-center">
+                <!-- Panel Superior (Rival) -->
+                <div id="vs-panel-top" class="absolute top-0 left-0 w-full h-1/2 bg-red-600 border-b-4 border-amber-300 flex items-center justify-end pr-10 transform -translate-x-full">
+                    <div class="flex items-center space-x-4">
+                        <span id="vs-rival-name" class="text-white text-xs sm:text-base font-black tracking-widest drop-shadow-md">LÍDER RIVAL</span>
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-900 border-2 border-white rounded overflow-hidden flex items-center justify-center shadow-lg">
+                            <img id="vs-rival-img" src="" alt="Rival" class="w-14 h-14 object-contain pixel-sprite">
+                        </div>
+                    </div>
+                </div>
+                <!-- Panel Inferior (Jugador) -->
+                <div id="vs-panel-bottom" class="absolute bottom-0 left-0 w-full h-1/2 bg-sky-600 border-t-4 border-amber-300 flex items-center justify-start pl-10 transform translate-x-full">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 bg-slate-900 border-2 border-white rounded overflow-hidden flex items-center justify-center shadow-lg">
+                            <img id="vs-player-img" src="" alt="Player" class="w-14 h-14 object-contain pixel-sprite">
+                        </div>
+                        <span id="vs-player-name" class="text-white text-xs sm:text-base font-black tracking-widest drop-shadow-md">ENTRENADOR</span>
+                    </div>
+                </div>
+                <!-- Símbolo VS Central -->
+                <div id="vs-logo" class="absolute z-40 opacity-0 transform scale-3xl">
+                    <div class="px-5 py-2 bg-amber-400 border-4 border-black text-slate-950 text-xl sm:text-3xl font-black rounded-xl shadow-[0_5px_0_rgba(0,0,0,1)] tracking-widest rotate-[-6deg] animate-pulse">
+                        VS
+                    </div>
                 </div>
             </div>
 
@@ -362,6 +404,10 @@
             document.getElementById('battle-screen').classList.remove('hidden');
             document.getElementById('empty-menu').classList.add('hidden');
             
+            // Asignar avatares de entrenadores para la pantalla VS
+            document.getElementById('vs-rival-img').src = "https://play.pokemonshowdown.com/sprites/trainers/youngster.png";
+            document.getElementById('vs-player-img').src = "https://play.pokemonshowdown.com/sprites/trainers/ethan.png";
+
             document.getElementById('player-sprite').src = gameState.player.spriteBack;
             document.getElementById('enemy-sprite').src = gameState.enemy.spriteFront;
             
@@ -371,38 +417,51 @@
             gameState.player.potions = 3;
             updateUI();
 
-            // CINEMÁTICA DE ENTRENADORES
+            // CINEMÁTICA DE PANTALLA VS
             gameState.isBusy = true;
-            const rivalBox = document.getElementById('rival-trainer-box');
-            const playerBox = document.getElementById('player-trainer-box');
+            const overlay = document.getElementById('vs-intro-overlay');
+            const topPanel = document.getElementById('vs-panel-top');
+            const bottomPanel = document.getElementById('vs-panel-bottom');
+            const vsLogo = document.getElementById('vs-logo');
 
-            rivalBox.style.opacity = '1';
-            playerBox.style.opacity = '1';
-            rivalBox.classList.add('trainer-intro-anim');
-            playerBox.classList.add('trainer-intro-anim');
+            overlay.classList.remove('hidden');
+            topPanel.classList.add('anim-vs-left');
+            bottomPanel.classList.add('anim-vs-right');
+            vsLogo.classList.add('anim-vs-logo');
 
-            await typeWriter(`¡El Entrenador rival te desafía a un combate!`);
-            await new Promise(r => setTimeout(r, 1400));
+            await typeWriter("¡El Líder rival te desafía a un combate!");
+            playRetroSFX('super-effective');
+            await new Promise(r => setTimeout(r, 1800));
 
-            // El rival saca su Pokémon
+            // Ocultar pantalla VS
+            topPanel.classList.remove('anim-vs-left');
+            bottomPanel.classList.remove('anim-vs-right');
+            vsLogo.classList.remove('anim-vs-logo');
+            overlay.classList.add('hidden');
+
+            // ANIMACIÓN DE LANZAMIENTO DE POKÉBALL (RIVAL)
+            const ballEnemy = document.getElementById('throw-pokeball-enemy');
+            ballEnemy.classList.add('anim-pokeball');
+            await new Promise(r => setTimeout(r, 400));
+            ballEnemy.classList.remove('anim-pokeball');
+
             await typeWriter(`¡El rival envió a ${gameState.enemy.name}!`);
-            rivalBox.style.opacity = '0';
-            rivalBox.classList.remove('trainer-intro-anim');
-            
             document.getElementById('enemy-sprite-box').style.opacity = '1';
             document.getElementById('enemy-card').style.opacity = '1';
             playRetroSFX('hit');
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 800));
 
-            // Tú sacas tu Pokémon
+            // ANIMACIÓN DE LANZAMIENTO DE POKÉBALL (JUGADOR)
+            const ballPlayer = document.getElementById('throw-pokeball-player');
+            ballPlayer.classList.add('anim-pokeball');
+            await new Promise(r => setTimeout(r, 400));
+            ballPlayer.classList.remove('anim-pokeball');
+
             await typeWriter(`¡Adelante, ${gameState.player.name}!`);
-            playerBox.style.opacity = '0';
-            playerBox.classList.remove('trainer-intro-anim');
-
             document.getElementById('player-sprite-box').style.opacity = '1';
             document.getElementById('player-card').style.opacity = '1';
             playRetroSFX('heal');
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 800));
 
             gameState.player.moves.forEach((m, idx) => {
                 document.getElementById(`move-name-${idx}`).innerText = m.name;
@@ -420,12 +479,11 @@
             if (gameState.isBusy) return;
             playRetroSFX('click');
             
-            document.getElementById('rival-trainer-box').style.opacity = '0';
-            document.getElementById('player-trainer-box').style.opacity = '0';
             document.getElementById('enemy-sprite-box').style.opacity = '0';
             document.getElementById('player-sprite-box').style.opacity = '0';
             document.getElementById('enemy-card').style.opacity = '0';
             document.getElementById('player-card').style.opacity = '0';
+            document.getElementById('vs-intro-overlay').classList.add('hidden');
 
             document.getElementById('battle-screen').classList.add('hidden');
             document.getElementById('main-menu').classList.remove('grid');
@@ -511,6 +569,14 @@
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.15);
                 osc.start(now);
                 osc.stop(now + 0.15);
+            } else if (type === 'super-effective') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(900, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
             } else if (type === 'heal') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(250, now);
