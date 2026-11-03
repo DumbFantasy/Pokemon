@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Custom Chiptune</title>
+    <title>Pokémon Battle Simulator - Custom Intro Fanfare</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -317,49 +317,65 @@
 
     </div>
 
-    <!-- SCRIPT DE AUDIO Y JUEGO CON TUS NOTAS EXACTAS -->
+    <!-- SCRIPT DE AUDIO Y JUEGO -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
         let currentStep = 0;
         let isPlaying = false;
-        let currentTrack = 'menu'; // 'menu', 'battle', 'victory'
+        let currentTrack = 'menu';
 
-        // FRECUENCIAS EXPLICITAS (Incluyendo alteraciones y octavas altas)
+        // MAPPING DE FRECUENCIAS EN HERTZ (Hz)
         const F = {
-            Re4: 293.66,
-            DSharp4: 311.13, // Re#
-            Mi4: 329.63,
-            Fa4: 349.23,
-            FSharp4: 369.99, // Fa#
-            Sol4: 392.00,
-            La4: 440.00,
-            ASharp4: 466.16, // La#
+            D4: 293.66,
+            DSharp4: 311.13,
+            E4: 329.63,
+            F4: 349.23,
+            FSharp4: 369.99,
+            G4: 392.00,
+            A4: 440.00,
+            ASharp4: 466.16,
             B4: 493.88,
-            C5: 523.25,      // Do normal
-            C5High: 1046.50, // Do una octava más alta
-            Re5: 587.33,
-            D5High: 1174.66, // Re una octava más alta
-            Mi5: 659.25,
-            Fa5: 698.46,
-            Sol5: 783.99,
-            La5: 880.00
+            C5: 523.25,
+            D5: 587.33,
+            E5: 659.25,
+            F5: 698.46,
+            G5: 783.99,
+            A5: 880.00
         };
 
-        // 1. PANTALLA DE INICIO / SELECCIÓN (133 bpm) con tus notas exactas
+        // 1. PANTALLA DE INICIO - FANFARRIA Y TEMA PRINCIPAL (Estructurado con la duración de tus notas)
         const MENU_NOTES = [
-            F.Re4, F.Re4, F.La4, F.Re4, F.Re4, F.ASharp4, F.Re4, F.Re4, F.La4, F.Re4, F.Re4, F.C5, 
-            F.Re4, F.Re4, F.La4, F.Re4, F.Re4, F.C5, F.Mi4, F.Re4, F.D5High, F.C5
+            // [Compás 1] Fanfarria
+            { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
+            { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 },
+            
+            // [Compás 2]
+            { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.B4, mult: 2 }, 
+            { note: F.C5, mult: 1 }, { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 },
+            
+            // [Compás 3] Desarrollo
+            { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
+            { note: F.B4, mult: 1 }, { note: F.E5, mult: 1 }, { note: F.D5, mult: 1 }, { note: F.C5, mult: 1 },
+            
+            // [Compás 4]
+            { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, 
+            { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 }
         ];
 
-        // 2. COMBATE (170 bpm) con tus notas exactas
+        // 2. COMBATE (170 bpm)
         const BATTLE_NOTES = [
-            F.Sol4, F.FSharp4, F.Fa4, F.Mi4, F.DSharp4, F.Re4, F.DSharp4, F.Re4, F.Mi4, F.Fa4, F.Re4, F.Mi4, F.Fa4, F.C5
+            { note: F.G4, mult: 1 }, { note: F.FSharp4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.E4, mult: 1 }, 
+            { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, 
+            { note: F.E4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.E4, mult: 1 }, 
+            { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }
         ];
 
-        // 3. FIN DE COMBATE / VICTORIA (145 bpm) con tus notas exactas
+        // 3. FIN DE COMBATE (145 bpm)
         const VICTORY_NOTES = [
-            F.La4, F.Fa4, F.C5, F.ASharp4, F.ASharp4, F.ASharp4, F.Sol4, F.ASharp4, F.La4
+            { note: F.A4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }, { note: F.ASharp4, mult: 1 }, 
+            { note: F.ASharp4, mult: 1 }, { note: F.ASharp4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.ASharp4, mult: 1 }, 
+            { note: F.A4, mult: 2 }
         ];
 
         function playNoteStep() {
@@ -370,18 +386,21 @@
             if (currentTrack === 'battle') playlist = BATTLE_NOTES;
             if (currentTrack === 'victory') playlist = VICTORY_NOTES;
 
-            const noteFreq = playlist[currentStep % playlist.length];
+            const item = playlist[currentStep % playlist.length];
             const now = audioCtx.currentTime;
-            const duration = (currentTrack === 'battle') ? 0.10 : (currentTrack === 'victory' ? 0.18 : 0.15);
+            
+            // Cálculo exacto del tiempo de nota según BPM y multiplicador ligador (-)
+            const baseTime = (currentTrack === 'battle') ? (60 / 170 / 2) : (currentTrack === 'victory' ? (60 / 145 / 2) : (60 / 133 / 2));
+            const duration = baseTime * item.mult;
 
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
 
             osc.type = (currentTrack === 'battle') ? 'sawtooth' : 'square';
-            osc.frequency.setValueAtTime(noteFreq, now);
+            osc.frequency.setValueAtTime(item.note, now);
 
             gain.gain.setValueAtTime(0.06, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+            gain.gain.exponentialRampToValueAtTime(0.001, now + (duration * 0.95));
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
@@ -393,10 +412,9 @@
         }
 
         function getIntervalByTrack() {
-            // Conversión de BPM a milisegundos para el intervalo
-            if (currentTrack === 'battle') return 60000 / 170 / 2;    // 170 bpm
-            if (currentTrack === 'victory') return 60000 / 145 / 2;   // 145 bpm
-            return 60000 / 133 / 2;                                   // 133 bpm (Menu)
+            if (currentTrack === 'battle') return (60000 / 170 / 2); 
+            if (currentTrack === 'victory') return (60000 / 145 / 2);
+            return (60000 / 133 / 2); // 133 BPM Intro
         }
 
         function toggleMusic() {
@@ -510,7 +528,7 @@
                 hp: 150,
                 maxHp: 150,
                 spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/9.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif",
+                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif",
                 moves: [
                     { name: "SURF", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
                     { name: "HIDROBOMBA", power: 70, accuracy: 0.90, pp: 5, maxPp: 5 },
@@ -572,7 +590,7 @@
 
         async function selectPokemon(index) {
             playRetroSFX('click');
-            setTrackMode('battle'); // Cambia al ritmo de combate (170 bpm)
+            setTrackMode('battle');
 
             const chosen = POKEMON_LIST[index];
             gameState.player = JSON.parse(JSON.stringify(chosen));
@@ -654,7 +672,7 @@
         function returnToSelection() {
             if (gameState.isBusy) return;
             playRetroSFX('click');
-            setTrackMode('menu'); // Vuelve al menú (133 bpm)
+            setTrackMode('menu');
 
             document.getElementById('enemy-sprite-box').style.opacity = '0';
             document.getElementById('player-sprite-box').style.opacity = '0';
@@ -784,7 +802,7 @@
 
                 if (gameState.enemy.hp <= 0) {
                     await new Promise(r => setTimeout(r, 400));
-                    setTrackMode('victory'); // Cambia a música de fin de combate (145 bpm)
+                    setTrackMode('victory');
                     await typeWriter(`¡El ${gameState.enemy.name} enemigo se debilitó! ¡Ganaste! 🏆`);
                     document.getElementById('enemy-sprite-box').style.opacity = '0';
                     return;
@@ -815,7 +833,7 @@
 
             if (gameState.player.hp <= 0) {
                 await new Promise(r => setTimeout(r, 400));
-                setTrackMode('victory'); // Cambia a música de fin de combate (145 bpm)
+                setTrackMode('victory');
                 await typeWriter(`¡${gameState.player.name} se debilitó! Has perdido el combate... 💀`);
                 document.getElementById('player-sprite-box').style.opacity = '0';
                 return;
