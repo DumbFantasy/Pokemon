@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Custom Intro Fanfare</title>
+    <title>Pokémon Battle Simulator - Type Effectiveness Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -317,7 +317,7 @@
 
     </div>
 
-    <!-- SCRIPT DE AUDIO Y JUEGO -->
+    <!-- SCRIPT DE AUDIO Y TABLA DE TIPOS -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
@@ -325,45 +325,43 @@
         let isPlaying = false;
         let currentTrack = 'menu';
 
-        // MAPPING DE FRECUENCIAS EN HERTZ (Hz)
-        const F = {
-            D4: 293.66,
-            DSharp4: 311.13,
-            E4: 329.63,
-            F4: 349.23,
-            FSharp4: 369.99,
-            G4: 392.00,
-            A4: 440.00,
-            ASharp4: 466.16,
-            B4: 493.88,
-            C5: 523.25,
-            D5: 587.33,
-            E5: 659.25,
-            F5: 698.46,
-            G5: 783.99,
-            A5: 880.00
+        // --- MATRIZ DE EFECTIVIDAD DE TIPOS ---
+        const TYPE_CHART = {
+            electric: { water: 2.0, grass: 0.5, electric: 0.5 },
+            fire:     { grass: 2.0, fire: 0.5, water: 0.5 },
+            water:    { fire: 2.0, water: 0.5, grass: 0.5 },
+            grass:    { water: 2.0, fire: 0.5, grass: 0.5 },
+            ghost:    { ghost: 2.0, normal: 0.0 },
+            normal:   { ghost: 0.0 },
+            ice:      { grass: 2.0, water: 0.5, fire: 0.5 },
+            psychic:  { },
+            poison:   { grass: 2.0 }
         };
 
-        // 1. PANTALLA DE INICIO - FANFARRIA Y TEMA PRINCIPAL (Estructurado con la duración de tus notas)
+        function getEffectiveness(moveType, targetType) {
+            if (TYPE_CHART[moveType] && TYPE_CHART[moveType][targetType] !== undefined) {
+                return TYPE_CHART[moveType][targetType];
+            }
+            return 1.0;
+        }
+
+        const F = {
+            D4: 293.66, DSharp4: 311.13, E4: 329.63, F4: 349.23, FSharp4: 369.99,
+            G4: 392.00, A4: 440.00, ASharp4: 466.16, B4: 493.88, C5: 523.25,
+            D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00
+        };
+
         const MENU_NOTES = [
-            // [Compás 1] Fanfarria
             { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
             { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 },
-            
-            // [Compás 2]
             { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.B4, mult: 2 }, 
             { note: F.C5, mult: 1 }, { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 },
-            
-            // [Compás 3] Desarrollo
             { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
             { note: F.B4, mult: 1 }, { note: F.E5, mult: 1 }, { note: F.D5, mult: 1 }, { note: F.C5, mult: 1 },
-            
-            // [Compás 4]
             { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, 
             { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 }
         ];
 
-        // 2. COMBATE (170 bpm)
         const BATTLE_NOTES = [
             { note: F.G4, mult: 1 }, { note: F.FSharp4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.E4, mult: 1 }, 
             { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, 
@@ -371,7 +369,6 @@
             { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }
         ];
 
-        // 3. FIN DE COMBATE (145 bpm)
         const VICTORY_NOTES = [
             { note: F.A4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }, { note: F.ASharp4, mult: 1 }, 
             { note: F.ASharp4, mult: 1 }, { note: F.ASharp4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.ASharp4, mult: 1 }, 
@@ -389,7 +386,6 @@
             const item = playlist[currentStep % playlist.length];
             const now = audioCtx.currentTime;
             
-            // Cálculo exacto del tiempo de nota según BPM y multiplicador ligador (-)
             const baseTime = (currentTrack === 'battle') ? (60 / 170 / 2) : (currentTrack === 'victory' ? (60 / 145 / 2) : (60 / 133 / 2));
             const duration = baseTime * item.mult;
 
@@ -414,7 +410,7 @@
         function getIntervalByTrack() {
             if (currentTrack === 'battle') return (60000 / 170 / 2); 
             if (currentTrack === 'victory') return (60000 / 145 / 2);
-            return (60000 / 133 / 2); // 133 BPM Intro
+            return (60000 / 133 / 2);
         }
 
         function toggleMusic() {
@@ -500,10 +496,10 @@
                 spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/25.gif",
                 spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif",
                 moves: [
-                    { name: "RAYO", power: 45, accuracy: 0.98, pp: 15, maxPp: 15 },
-                    { name: "ATAQUE RÁPIDO", power: 30, accuracy: 1.0, pp: 30, maxPp: 30 },
-                    { name: "COLA FÉRREA", power: 50, accuracy: 0.90, pp: 15, maxPp: 15 },
-                    { name: "TRUENO", power: 70, accuracy: 0.85, pp: 10, maxPp: 10 }
+                    { name: "RAYO", type: "electric", power: 45, accuracy: 0.98, pp: 15, maxPp: 15 },
+                    { name: "ATAQUE RÁPIDO", type: "normal", power: 30, accuracy: 1.0, pp: 30, maxPp: 30 },
+                    { name: "COLA FÉRREA", type: "normal", power: 50, accuracy: 0.90, pp: 15, maxPp: 15 },
+                    { name: "TRUENO", type: "electric", power: 70, accuracy: 0.85, pp: 10, maxPp: 10 }
                 ]
             },
             {
@@ -515,10 +511,10 @@
                 spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/6.gif",
                 spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif",
                 moves: [
-                    { name: "LANZALLAMAS", power: 45, accuracy: 0.98, pp: 15, maxPp: 15 },
-                    { name: "GARRA DRAGÓN", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "VUELO", power: 50, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "LLAMARADA", power: 70, accuracy: 0.85, pp: 5, maxPp: 5 }
+                    { name: "LANZALLAMAS", type: "fire", power: 45, accuracy: 0.98, pp: 15, maxPp: 15 },
+                    { name: "GARRA DRAGÓN", type: "normal", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "VUELO", type: "normal", power: 50, accuracy: 0.95, pp: 10, maxPp: 10 },
+                    { name: "LLAMARADA", type: "fire", power: 70, accuracy: 0.85, pp: 5, maxPp: 5 }
                 ]
             },
             {
@@ -530,10 +526,10 @@
                 spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/9.gif",
                 spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif",
                 moves: [
-                    { name: "SURF", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "HIDROBOMBA", power: 70, accuracy: 0.90, pp: 5, maxPp: 5 },
-                    { name: "MORDISCO", power: 35, accuracy: 1.0, pp: 25, maxPp: 25 },
-                    { name: "RAYO HIELO", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 }
+                    { name: "SURF", type: "water", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "HIDROBOMBA", type: "water", power: 70, accuracy: 0.90, pp: 5, maxPp: 5 },
+                    { name: "MORDISCO", type: "normal", power: 35, accuracy: 1.0, pp: 25, maxPp: 25 },
+                    { name: "RAYO HIELO", type: "ice", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 }
                 ]
             },
             {
@@ -545,10 +541,10 @@
                 spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/3.gif",
                 spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/3.gif",
                 moves: [
-                    { name: "LÁTIGO CEPA", power: 40, accuracy: 1.0, pp: 20, maxPp: 20 },
-                    { name: "GIGADRENADO", power: 50, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "BOMBA LODAZAL", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "RAYO SOLAR", power: 75, accuracy: 0.90, pp: 5, maxPp: 5 }
+                    { name: "LÁTIGO CEPA", type: "grass", power: 40, accuracy: 1.0, pp: 20, maxPp: 20 },
+                    { name: "GIGADRENADO", type: "grass", power: 50, accuracy: 1.0, pp: 10, maxPp: 10 },
+                    { name: "BOMBA LODAZAL", type: "poison", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
+                    { name: "RAYO SOLAR", type: "grass", power: 75, accuracy: 0.90, pp: 5, maxPp: 5 }
                 ]
             },
             {
@@ -560,10 +556,10 @@
                 spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/94.gif",
                 spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/94.gif",
                 moves: [
-                    { name: "BOLA SOMBRA", power: 50, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "COLMILLO VEN", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "PSÍQUICO", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "RAYO", power: 65, accuracy: 0.95, pp: 10, maxPp: 10 }
+                    { name: "BOLA SOMBRA", type: "ghost", power: 50, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "COLMILLO VEN", type: "poison", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "PSÍQUICO", type: "psychic", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
+                    { name: "RAYO", type: "electric", power: 65, accuracy: 0.95, pp: 10, maxPp: 10 }
                 ]
             }
         ];
@@ -755,6 +751,7 @@
             document.getElementById('potion-count').innerText = gameState.player.potions;
 
             gameState.player.moves.forEach((m, idx) => {
+                document.getElementById(`move-name-${idx}`).innerText = m.name;
                 document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
             });
         }
@@ -788,17 +785,32 @@
             playerSprite.classList.remove('anim-attack-player');
 
             if (Math.random() <= move.accuracy) {
-                const finalDmg = move.power + Math.floor(Math.random() * 8);
+                const mult = getEffectiveness(move.type, gameState.enemy.type);
+                const rawDmg = move.power + Math.floor(Math.random() * 8);
+                const finalDmg = Math.floor(rawDmg * mult);
 
-                gameState.enemy.hp = Math.max(0, gameState.enemy.hp - finalDmg);
-                playRetroSFX('hit');
-                popDamageText('enemy', `-${finalDmg}`);
+                if (mult === 0) {
+                    await typeWriter(`¡No afecta a ${gameState.enemy.name}! 🚫`);
+                } else {
+                    gameState.enemy.hp = Math.max(0, gameState.enemy.hp - finalDmg);
+                    
+                    if (mult > 1.0) playRetroSFX('super-effective');
+                    else playRetroSFX('hit');
 
-                const enemySprite = document.getElementById('enemy-sprite');
-                enemySprite.classList.add('anim-damage');
-                updateUI();
-                await new Promise(r => setTimeout(r, 400));
-                enemySprite.classList.remove('anim-damage');
+                    popDamageText('enemy', `-${finalDmg}`);
+
+                    const enemySprite = document.getElementById('enemy-sprite');
+                    enemySprite.classList.add('anim-damage');
+                    updateUI();
+                    await new Promise(r => setTimeout(r, 400));
+                    enemySprite.classList.remove('anim-damage');
+
+                    if (mult > 1.0) {
+                        await typeWriter("¡Es súper eficaz! 💥");
+                    } else if (mult < 1.0) {
+                        await typeWriter("No es muy eficaz... 🛡️");
+                    }
+                }
 
                 if (gameState.enemy.hp <= 0) {
                     await new Promise(r => setTimeout(r, 400));
@@ -813,6 +825,7 @@
 
             await new Promise(r => setTimeout(r, 800));
 
+            // TURNO ENEMIGO
             const enemyMove = gameState.enemy.moves[Math.floor(Math.random() * gameState.enemy.moves.length)];
             await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
 
@@ -821,22 +834,42 @@
             await new Promise(r => setTimeout(r, 250));
             enemySprite.classList.remove('anim-attack-enemy');
 
-            const enemyDmg = enemyMove.power + Math.floor(Math.random() * 6);
-            gameState.player.hp = Math.max(0, gameState.player.hp - enemyDmg);
-            playRetroSFX('hit');
-            popDamageText('player', `-${enemyDmg}`);
+            if (Math.random() <= enemyMove.accuracy) {
+                const eMult = getEffectiveness(enemyMove.type, gameState.player.type);
+                const eRawDmg = enemyMove.power + Math.floor(Math.random() * 6);
+                const enemyDmg = Math.floor(eRawDmg * eMult);
 
-            playerSprite.classList.add('anim-damage');
-            updateUI();
-            await new Promise(r => setTimeout(r, 400));
-            playerSprite.classList.remove('anim-damage');
+                if (eMult === 0) {
+                    await typeWriter(`¡No afecta a ${gameState.player.name}! 🚫`);
+                } else {
+                    gameState.player.hp = Math.max(0, gameState.player.hp - enemyDmg);
+                    
+                    if (eMult > 1.0) playRetroSFX('super-effective');
+                    else playRetroSFX('hit');
 
-            if (gameState.player.hp <= 0) {
-                await new Promise(r => setTimeout(r, 400));
-                setTrackMode('victory');
-                await typeWriter(`¡${gameState.player.name} se debilitó! Has perdido el combate... 💀`);
-                document.getElementById('player-sprite-box').style.opacity = '0';
-                return;
+                    popDamageText('player', `-${enemyDmg}`);
+
+                    playerSprite.classList.add('anim-damage');
+                    updateUI();
+                    await new Promise(r => setTimeout(r, 400));
+                    playerSprite.classList.remove('anim-damage');
+
+                    if (eMult > 1.0) {
+                        await typeWriter("¡Es súper eficaz contra ti! 💥");
+                    } else if (eMult < 1.0) {
+                        await typeWriter("No fue muy eficaz... 🛡️");
+                    }
+                }
+
+                if (gameState.player.hp <= 0) {
+                    await new Promise(r => setTimeout(r, 400));
+                    setTrackMode('victory');
+                    await typeWriter(`¡${gameState.player.name} se debilitó! Has perdido el combate... 💀`);
+                    document.getElementById('player-sprite-box').style.opacity = '0';
+                    return;
+                }
+            } else {
+                await typeWriter(`¡El ataque de ${gameState.enemy.name} falló!`);
             }
 
             await new Promise(r => setTimeout(r, 600));
