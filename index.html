@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Single File Edition</title>
+    <title>Pokémon Battle Simulator - Epic Chiptune Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -317,7 +317,7 @@
 
     </div>
 
-    <!-- SCRIPT COMPLETO INTEGRADO -->
+    <!-- SCRIPT DE AUDIO Y JUEGO INTEGRADO -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
@@ -328,22 +328,30 @@
         const NOTES = {
             C3: 130.81, D3: 146.83, E3: 164.81, F3: 174.61, G3: 196.00, A3: 220.00, B3: 246.94,
             C4: 261.63, D4: 293.66, E4: 329.63, F4: 349.23, G4: 392.00, A4: 440.00, B4: 493.88,
-            C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00, B5: 987.77,
+            C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00,
             OFF: 0
         };
 
+        // MELODÍA DE MENÚ EXTENDIDA (Estructura tipo canción completa de exploración)
         const MENU_MELODY = [
-            { note: NOTES.C4, duration: 0.15 }, { note: NOTES.E4, duration: 0.15 }, { note: NOTES.G4, duration: 0.15 },
-            { note: NOTES.C5, duration: 0.25 }, { note: NOTES.B4, duration: 0.15 }, { note: NOTES.G4, duration: 0.15 },
-            { note: NOTES.A4, duration: 0.15 }, { note: NOTES.F4, duration: 0.15 }, { note: NOTES.D4, duration: 0.25 },
-            { note: NOTES.G4, duration: 0.15 }, { note: NOTES.E4, duration: 0.15 }, { note: NOTES.C4, duration: 0.30 }
+            { note: NOTES.C4, dur: 0.15 }, { note: NOTES.E4, dur: 0.15 }, { note: NOTES.G4, dur: 0.15 }, { note: NOTES.C5, dur: 0.30 },
+            { note: NOTES.B4, dur: 0.15 }, { note: NOTES.G4, dur: 0.15 }, { note: NOTES.A4, dur: 0.30 }, { note: NOTES.OFF, dur: 0.10 },
+            { note: NOTES.F4, dur: 0.15 }, { note: NOTES.A4, dur: 0.15 }, { note: NOTES.C5, dur: 0.15 }, { note: NOTES.E5, dur: 0.30 },
+            { note: NOTES.D5, dur: 0.15 }, { note: NOTES.C5, dur: 0.15 }, { note: NOTES.B4, dur: 0.30 }, { note: NOTES.OFF, dur: 0.10 }
         ];
 
+        // MELODÍA DE BATALLA EXTENDIDA (Ritmo rápido, completo y energético)
         const BATTLE_MELODY = [
-            { note: NOTES.E4, duration: 0.10 }, { note: NOTES.E4, duration: 0.10 }, { note: NOTES.G4, duration: 0.10 },
-            { note: NOTES.B4, duration: 0.10 }, { note: NOTES.A4, duration: 0.10 }, { note: NOTES.G4, duration: 0.10 },
-            { note: NOTES.E4, duration: 0.10 }, { note: NOTES.D4, duration: 0.10 }, { note: NOTES.F4, duration: 0.10 },
-            { note: NOTES.A4, duration: 0.10 }, { note: NOTES.C5, duration: 0.15 }, { note: NOTES.B4, duration: 0.15 }
+            { note: NOTES.E4, dur: 0.10 }, { note: NOTES.G4, dur: 0.10 }, { note: NOTES.B4, dur: 0.10 }, { note: NOTES.E5, dur: 0.20 },
+            { note: NOTES.D5, dur: 0.10 }, { note: NOTES.B4, dur: 0.10 }, { note: NOTES.G4, dur: 0.20 }, { note: NOTES.OFF, dur: 0.05 },
+            { note: NOTES.C5, dur: 0.10 }, { note: NOTES.E5, dur: 0.10 }, { note: NOTES.G5, dur: 0.15 }, { note: NOTES.F5, dur: 0.10 },
+            { note: NOTES.E5, dur: 0.10 }, { note: NOTES.D5, dur: 0.10 }, { note: NOTES.C5, dur: 0.25 }, { note: NOTES.OFF, dur: 0.05 }
+        ];
+
+        // CANAL DE BAJO ACOMPAÑANTE PARA DARLE CUERPO A LA MÚSICA
+        const BASS_LINE = [
+            { note: NOTES.C3, dur: 0.30 }, { note: NOTES.G3, dur: 0.30 }, { note: NOTES.A3, dur: 0.30 }, { note: NOTES.E3, dur: 0.30 },
+            { note: NOTES.F3, dur: 0.30 }, { note: NOTES.C3, dur: 0.30 }, { note: NOTES.G3, dur: 0.30 }, { note: NOTES.B3, dur: 0.30 }
         ];
 
         function playNoteStep() {
@@ -351,24 +359,37 @@
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
             const playlist = (currentTrack === 'battle') ? BATTLE_MELODY : MENU_MELODY;
-            const currentItem = playlist[currentStep % playlist.length];
-            
-            if (currentItem.note !== NOTES.OFF) {
-                const now = audioCtx.currentTime;
+            const item = playlist[currentStep % playlist.length];
+            const bassItem = BASS_LINE[Math.floor(currentStep / 2) % BASS_LINE.length];
+
+            const now = audioCtx.currentTime;
+
+            // Reproducir Melodía Principal
+            if (item.note !== NOTES.OFF) {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-
                 osc.type = (currentTrack === 'battle') ? 'sawtooth' : 'square';
-                osc.frequency.setValueAtTime(currentItem.note, now);
-
-                gain.gain.setValueAtTime(0.06, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + currentItem.duration);
-
+                osc.frequency.setValueAtTime(item.note, now);
+                gain.gain.setValueAtTime(0.05, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + item.dur);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
-
                 osc.start(now);
-                osc.stop(now + currentItem.duration);
+                osc.stop(now + item.dur);
+            }
+
+            // Reproducir Bajo armónico de fondo
+            if (bassItem && bassItem.note !== NOTES.OFF) {
+                const bassOsc = audioCtx.createOscillator();
+                const bassGain = audioCtx.createGain();
+                bassOsc.type = 'triangle';
+                bassOsc.frequency.setValueAtTime(bassItem.note, now);
+                bassGain.gain.setValueAtTime(0.06, now);
+                bassGain.gain.exponentialRampToValueAtTime(0.001, now + bassItem.dur);
+                bassOsc.connect(bassGain);
+                bassGain.connect(audioCtx.destination);
+                bassOsc.start(now);
+                bassOsc.stop(now + bassItem.dur);
             }
 
             currentStep++;
@@ -388,7 +409,7 @@
             } else {
                 isPlaying = true;
                 currentStep = 0;
-                const speed = (currentTrack === 'battle') ? 120 : 150;
+                const speed = (currentTrack === 'battle') ? 110 : 140;
                 bgmInterval = setInterval(playNoteStep, speed);
                 if (btn) {
                     btn.innerText = "⏸️ MÚSICA: ON";
@@ -402,7 +423,7 @@
             currentStep = 0;
             if (isPlaying) {
                 clearInterval(bgmInterval);
-                const speed = (currentTrack === 'battle') ? 120 : 150;
+                const speed = (currentTrack === 'battle') ? 110 : 140;
                 bgmInterval = setInterval(playNoteStep, speed);
             }
         }
