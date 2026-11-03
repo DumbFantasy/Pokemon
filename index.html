@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Epic Chiptune Edition</title>
+    <title>Pokémon Battle Simulator - Polyphonic Chiptune</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -317,7 +317,7 @@
 
     </div>
 
-    <!-- SCRIPT DE AUDIO Y JUEGO INTEGRADO -->
+    <!-- SCRIPT DE POLIFONÍA CHIPTUNE Y LÓGICA DE BATALLA -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
@@ -332,64 +332,91 @@
             OFF: 0
         };
 
-        // MELODÍA DE MENÚ EXTENDIDA (Estructura tipo canción completa de exploración)
+        // --- SISTEMA POLIFÓNICO ESTILO POKÉMON ---
+        // Canal 1: Melodía Principal (Onda cuadrada rítmica)
         const MENU_MELODY = [
-            { note: NOTES.C4, dur: 0.15 }, { note: NOTES.E4, dur: 0.15 }, { note: NOTES.G4, dur: 0.15 }, { note: NOTES.C5, dur: 0.30 },
-            { note: NOTES.B4, dur: 0.15 }, { note: NOTES.G4, dur: 0.15 }, { note: NOTES.A4, dur: 0.30 }, { note: NOTES.OFF, dur: 0.10 },
-            { note: NOTES.F4, dur: 0.15 }, { note: NOTES.A4, dur: 0.15 }, { note: NOTES.C5, dur: 0.15 }, { note: NOTES.E5, dur: 0.30 },
-            { note: NOTES.D5, dur: 0.15 }, { note: NOTES.C5, dur: 0.15 }, { note: NOTES.B4, dur: 0.30 }, { note: NOTES.OFF, dur: 0.10 }
+            NOTES.E4, NOTES.G4, NOTES.C5, NOTES.B4, NOTES.G4, NOTES.E4, NOTES.D4, NOTES.E4,
+            NOTES.F4, NOTES.A4, NOTES.C5, NOTES.E5, NOTES.D5, NOTES.C5, NOTES.B4, NOTES.G4
+        ];
+        // Canal 2: Armonía / Contrapunto (Ondas que enriquecen los acordes simultáneos)
+        const MENU_HARMONY = [
+            NOTES.C4, NOTES.E4, NOTES.G4, NOTES.G4, NOTES.E4, NOTES.C4, NOTES.B3, NOTES.C4,
+            NOTES.D4, NOTES.F4, NOTES.A4, NOTES.C5, NOTES.B4, NOTES.A4, NOTES.G4, NOTES.E4
+        ];
+        // Canal 3: Bajo rítmico de acompañamiento
+        const MENU_BASS = [
+            NOTES.C3, NOTES.C3, NOTES.G3, NOTES.G3, NOTES.A3, NOTES.A3, NOTES.F3, NOTES.G3
         ];
 
-        // MELODÍA DE BATALLA EXTENDIDA (Ritmo rápido, completo y energético)
+        // Secuencias específicas y rápidas para BATALLA
         const BATTLE_MELODY = [
-            { note: NOTES.E4, dur: 0.10 }, { note: NOTES.G4, dur: 0.10 }, { note: NOTES.B4, dur: 0.10 }, { note: NOTES.E5, dur: 0.20 },
-            { note: NOTES.D5, dur: 0.10 }, { note: NOTES.B4, dur: 0.10 }, { note: NOTES.G4, dur: 0.20 }, { note: NOTES.OFF, dur: 0.05 },
-            { note: NOTES.C5, dur: 0.10 }, { note: NOTES.E5, dur: 0.10 }, { note: NOTES.G5, dur: 0.15 }, { note: NOTES.F5, dur: 0.10 },
-            { note: NOTES.E5, dur: 0.10 }, { note: NOTES.D5, dur: 0.10 }, { note: NOTES.C5, dur: 0.25 }, { note: NOTES.OFF, dur: 0.05 }
+            NOTES.E5, NOTES.E5, NOTES.D5, NOTES.B4, NOTES.C5, NOTES.E5, NOTES.G5, NOTES.F5,
+            NOTES.E5, NOTES.C5, NOTES.D5, NOTES.B4, NOTES.G4, NOTES.B4, NOTES.D5, NOTES.E5
+        ];
+        const BATTLE_HARMONY = [
+            NOTES.B4, NOTES.B4, NOTES.G4, NOTES.E4, NOTES.G4, NOTES.B4, NOTES.E5, NOTES.D5,
+            NOTES.C5, NOTES.G4, NOTES.B4, NOTES.G4, NOTES.E4, NOTES.G4, NOTES.B4, NOTES.C5
+        ];
+        const BATTLE_BASS = [
+            NOTES.E3, NOTES.E3, NOTES.A3, NOTES.A3, NOTES.G3, NOTES.G3, NOTES.B3, NOTES.C3
         ];
 
-        // CANAL DE BAJO ACOMPAÑANTE PARA DARLE CUERPO A LA MÚSICA
-        const BASS_LINE = [
-            { note: NOTES.C3, dur: 0.30 }, { note: NOTES.G3, dur: 0.30 }, { note: NOTES.A3, dur: 0.30 }, { note: NOTES.E3, dur: 0.30 },
-            { note: NOTES.F3, dur: 0.30 }, { note: NOTES.C3, dur: 0.30 }, { note: NOTES.G3, dur: 0.30 }, { note: NOTES.B3, dur: 0.30 }
-        ];
-
-        function playNoteStep() {
+        function playPolyphonicStep() {
             if (!isPlaying) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
 
-            const playlist = (currentTrack === 'battle') ? BATTLE_MELODY : MENU_MELODY;
-            const item = playlist[currentStep % playlist.length];
-            const bassItem = BASS_LINE[Math.floor(currentStep / 2) % BASS_LINE.length];
+            const isBattle = (currentTrack === 'battle');
+            const melody = isBattle ? BATTLE_MELODY : MENU_MELODY;
+            const harmony = isBattle ? BATTLE_HARMONY : MENU_HARMONY;
+            const bass = isBattle ? BATTLE_BASS : MENU_BASS;
+
+            const mNote = melody[currentStep % melody.length];
+            const hNote = harmony[currentStep % harmony.length];
+            const bNote = bass[Math.floor(currentStep / 2) % bass.length];
 
             const now = audioCtx.currentTime;
+            const stepDuration = isBattle ? 0.11 : 0.14;
 
-            // Reproducir Melodía Principal
-            if (item.note !== NOTES.OFF) {
+            // 1. Canal de Melodía Principal (Onda Cuadrada nítida)
+            if (mNote !== NOTES.OFF) {
                 const osc = audioCtx.createOscillator();
                 const gain = audioCtx.createGain();
-                osc.type = (currentTrack === 'battle') ? 'sawtooth' : 'square';
-                osc.frequency.setValueAtTime(item.note, now);
-                gain.gain.setValueAtTime(0.05, now);
-                gain.gain.exponentialRampToValueAtTime(0.001, now + item.dur);
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(mNote, now);
+                gain.gain.setValueAtTime(0.04, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + stepDuration);
                 osc.connect(gain);
                 gain.connect(audioCtx.destination);
                 osc.start(now);
-                osc.stop(now + item.dur);
+                osc.stop(now + stepDuration);
             }
 
-            // Reproducir Bajo armónico de fondo
-            if (bassItem && bassItem.note !== NOTES.OFF) {
-                const bassOsc = audioCtx.createOscillator();
-                const bassGain = audioCtx.createGain();
-                bassOsc.type = 'triangle';
-                bassOsc.frequency.setValueAtTime(bassItem.note, now);
-                bassGain.gain.setValueAtTime(0.06, now);
-                bassGain.gain.exponentialRampToValueAtTime(0.001, now + bassItem.dur);
-                bassOsc.connect(bassGain);
-                bassGain.connect(audioCtx.destination);
-                bassOsc.start(now);
-                bassOsc.stop(now + bassItem.dur);
+            // 2. Canal de Armonía (Onda de Sierra para textura polifónica)
+            if (hNote !== NOTES.OFF) {
+                const oscH = audioCtx.createOscillator();
+                const gainH = audioCtx.createGain();
+                oscH.type = 'sawtooth';
+                oscH.frequency.setValueAtTime(hNote, now);
+                gainH.gain.setValueAtTime(0.025, now);
+                gainH.gain.exponentialRampToValueAtTime(0.001, now + stepDuration);
+                oscH.connect(gainH);
+                gainH.connect(audioCtx.destination);
+                oscH.start(now);
+                oscH.stop(now + stepDuration);
+            }
+
+            // 3. Canal de Bajo (Onda Triangular profunda)
+            if (bNote !== NOTES.OFF) {
+                const oscB = audioCtx.createOscillator();
+                const gainB = audioCtx.createGain();
+                oscB.type = 'triangle';
+                oscB.frequency.setValueAtTime(bNote, now);
+                gainB.gain.setValueAtTime(0.07, now);
+                gainB.gain.exponentialRampToValueAtTime(0.001, now + (stepDuration * 1.8));
+                oscB.connect(gainB);
+                gainB.connect(audioCtx.destination);
+                oscB.start(now);
+                oscB.stop(now + (stepDuration * 1.8));
             }
 
             currentStep++;
@@ -409,8 +436,8 @@
             } else {
                 isPlaying = true;
                 currentStep = 0;
-                const speed = (currentTrack === 'battle') ? 110 : 140;
-                bgmInterval = setInterval(playNoteStep, speed);
+                const speed = (currentTrack === 'battle') ? 110 : 135;
+                bgmInterval = setInterval(playPolyphonicStep, speed);
                 if (btn) {
                     btn.innerText = "⏸️ MÚSICA: ON";
                     btn.className = "px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded border-2 border-emerald-300 transition-all active:translate-y-0.5";
@@ -423,8 +450,8 @@
             currentStep = 0;
             if (isPlaying) {
                 clearInterval(bgmInterval);
-                const speed = (currentTrack === 'battle') ? 110 : 140;
-                bgmInterval = setInterval(playNoteStep, speed);
+                const speed = (currentTrack === 'battle') ? 110 : 135;
+                bgmInterval = setInterval(playPolyphonicStep, speed);
             }
         }
 
