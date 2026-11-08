@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Mimikyu Edition</title>
+    <title>Pokémon Battle Simulator - Trainer AI Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -220,7 +220,7 @@
                     <div class="flex items-center space-x-4">
                         <span id="vs-rival-name" class="text-white text-sm sm:text-lg font-black tracking-widest drop-shadow-md">LÍDER RIVAL</span>
                         <div class="w-24 h-24 sm:w-28 sm:h-28 bg-slate-900 border-4 border-white rounded-lg overflow-hidden flex items-center justify-center shadow-2xl">
-                            <img id="vs-rival-img" src="https://play.pokemonshowdown.com/sprites/trainers/youngster.png" alt="Rival" class="w-20 h-20 sm:w-24 sm:h-24 object-contain pixel-sprite scale-125">
+                            <img id="vs-rival-img" src="" alt="Rival" class="w-20 h-20 sm:w-24 sm:h-24 object-contain pixel-sprite scale-125">
                         </div>
                     </div>
                 </div>
@@ -241,10 +241,25 @@
 
         </div>
 
-        <!-- PANTALLA DE SELECCIÓN DE POKÉMON -->
-        <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4 flex flex-col justify-center items-center">
-            <h2 class="text-xs sm:text-sm text-amber-400 font-bold mb-3 tracking-widest text-center">ELIGE A TU POKÉMON INICIAL</h2>
-            <div id="pokemon-roster" class="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
+        <!-- PANTALLA DE SELECCIÓN DE POKÉMON Y DIFICULTAD -->
+        <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4 flex flex-col justify-center items-center overflow-y-auto">
+            <h2 class="text-xs sm:text-sm text-amber-400 font-bold mb-2 tracking-widest text-center">1. ELIGE DIFICULTAD</h2>
+            
+            <!-- SELECTOR DE DIFICULTAD -->
+            <div class="flex gap-2 mb-3">
+                <button onclick="setDifficulty('easy')" id="btn-diff-easy" class="px-3 py-1 bg-emerald-600 border-2 border-emerald-300 text-white text-[8px] font-bold rounded shadow active:translate-y-0.5">
+                    😊 FÁCIL (Chico)
+                </button>
+                <button onclick="setDifficulty('medium')" id="btn-diff-medium" class="px-3 py-1 bg-amber-600 border-2 border-amber-300 text-white text-[8px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
+                    🚀 INTERMEDIO (Rocket)
+                </button>
+                <button onclick="setDifficulty('hard')" id="btn-diff-hard" class="px-3 py-1 bg-red-600 border-2 border-red-300 text-white text-[8px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
+                    👑 DIFÍCIL (Cynthia)
+                </button>
+            </div>
+
+            <h2 class="text-xs sm:text-sm text-amber-400 font-bold mb-2 tracking-widest text-center">2. ELIGE A TU POKÉMON</h2>
+            <div id="pokemon-roster" class="grid grid-cols-3 sm:grid-cols-6 gap-2 w-full max-w-lg">
                 <!-- Se llena por JavaScript -->
             </div>
         </div>
@@ -253,7 +268,7 @@
         <div class="bg-slate-900 border-t-4 border-slate-700 p-2 sm:p-3 min-h-[150px] flex flex-col justify-between">
             
             <div id="dialog-box" class="gba-box p-3 text-[10px] sm:text-xs text-slate-100 min-h-[56px] flex items-center leading-relaxed tracking-wider vt323 text-lg">
-                <span id="typewriter-text">¡Bienvenido al simulador de batallas! Elige tu Pokémon.</span>
+                <span id="typewriter-text">¡Bienvenido! Selecciona dificultad y tu Pokémon.</span>
             </div>
 
             <!-- MENÚ PRINCIPAL DE BATALLA -->
@@ -317,13 +332,37 @@
 
     </div>
 
-    <!-- SCRIPT DE AUDIO, TIPOS Y JUEGO -->
+    <!-- SCRIPT PRINCIPAL Y DE AUDIO -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
         let currentStep = 0;
         let isPlaying = false;
         let currentTrack = 'menu';
+        let currentDifficulty = 'easy'; // 'easy', 'medium', 'hard'
+
+        const TRAINERS = {
+            easy: {
+                name: "CHICO RUTA 1",
+                sprite: "https://play.pokemonshowdown.com/sprites/trainers/youngster.png"
+            },
+            medium: {
+                name: "RECLUTA ROCKET",
+                sprite: "https://play.pokemonshowdown.com/sprites/trainers/teamrocket-gruntf.png"
+            },
+            hard: {
+                name: "CAMPEONA CYNTHIA",
+                sprite: "https://play.pokemonshowdown.com/sprites/trainers/cynthia.png"
+            }
+        };
+
+        function setDifficulty(diff) {
+            playRetroSFX('click');
+            currentDifficulty = diff;
+            document.getElementById('btn-diff-easy').style.opacity = (diff === 'easy') ? '1' : '0.6';
+            document.getElementById('btn-diff-medium').style.opacity = (diff === 'medium') ? '1' : '0.6';
+            document.getElementById('btn-diff-hard').style.opacity = (diff === 'hard') ? '1' : '0.6';
+        }
 
         const TYPE_CHART = {
             electric: { water: 2.0, grass: 0.5, electric: 0.5 },
@@ -588,9 +627,8 @@
             POKEMON_LIST.forEach((p, idx) => {
                 roster.innerHTML += `
                     <button onclick="selectPokemon(${idx})" class="gba-box p-2 flex flex-col items-center hover:bg-slate-700 active:translate-y-0.5 transition-all">
-                        <img src="${p.spriteFront}" alt="${p.name}" class="w-14 h-14 pixel-sprite mb-1">
-                        <span class="text-[8px] font-bold text-amber-300">${p.name}</span>
-                        <span class="text-[7px] text-slate-400">PS: 150</span>
+                        <img src="${p.spriteFront}" alt="${p.name}" class="w-12 h-12 pixel-sprite mb-1">
+                        <span class="text-[7px] font-bold text-amber-300">${p.name}</span>
                     </button>
                 `;
             });
@@ -609,6 +647,11 @@
             } while (POKEMON_LIST.length > 1 && POKEMON_LIST[enemyIndex].name === chosen.name);
             
             gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
+
+            // Configurar Entrenador Rival según dificultad
+            const trainerData = TRAINERS[currentDifficulty];
+            document.getElementById('vs-rival-name').innerText = trainerData.name;
+            document.getElementById('vs-rival-img').src = trainerData.sprite;
 
             document.getElementById('selection-screen').classList.add('hidden');
             document.getElementById('battle-screen').classList.remove('hidden');
@@ -634,7 +677,7 @@
             bottomPanel.classList.add('anim-vs-right');
             vsLogo.classList.add('anim-vs-logo');
 
-            await typeWriter("¡El Líder rival te desafía a un combate!");
+            await typeWriter(`¡${trainerData.name} te desafía a un combate!`);
             playRetroSFX('super-effective');
             await new Promise(r => setTimeout(r, 1600));
 
@@ -693,7 +736,7 @@
             document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('empty-menu').classList.remove('hidden');
             document.getElementById('selection-screen').classList.remove('hidden');
-            typeWriter("Elige a tu Pokémon inicial.");
+            typeWriter("Selecciona dificultad y tu Pokémon.");
         }
 
         function typeWriter(text) {
@@ -775,6 +818,41 @@
             pop.classList.add('damage-pop-text');
         }
 
+        // --- INTELIGENCIA ARTIFICIAL DEL RIVAL ---
+        function chooseEnemyMove() {
+            const moves = gameState.enemy.moves;
+            const targetType = gameState.player.type;
+
+            if (currentDifficulty === 'easy') {
+                // Modo Fácil: Selección totalmente al azar
+                return moves[Math.floor(Math.random() * moves.length)];
+            } 
+            else if (currentDifficulty === 'medium') {
+                // Modo Intermedio: Busca un ataque supereficaz si lo tiene, sino al azar
+                const superMoves = moves.filter(m => getEffectiveness(m.type, targetType) > 1.0);
+                if (superMoves.length > 0 && Math.random() < 0.7) {
+                    return superMoves[Math.floor(Math.random() * superMoves.length)];
+                }
+                return moves[Math.floor(Math.random() * moves.length)];
+            } 
+            else {
+                // Modo Difícil (Cynthia): Calcula el puntaje de daño óptimo (Potencia * Efectividad)
+                let bestMove = moves[0];
+                let maxScore = -1;
+
+                moves.forEach(m => {
+                    const eff = getEffectiveness(m.type, targetType);
+                    if (eff === 0.0) return; // Evita ataques ineficaces
+                    const score = m.power * eff;
+                    if (score > maxScore) {
+                        maxScore = score;
+                        bestMove = m;
+                    }
+                });
+                return bestMove;
+            }
+        }
+
         async function useMove(index) {
             if (gameState.isBusy) return;
             const move = gameState.player.moves[index];
@@ -836,7 +914,8 @@
 
             await new Promise(r => setTimeout(r, 800));
 
-            const enemyMove = gameState.enemy.moves[Math.floor(Math.random() * gameState.enemy.moves.length)];
+            // TURNO ENEMIGO (IA Inteligente)
+            const enemyMove = chooseEnemyMove();
             await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
 
             const enemySprite = document.getElementById('enemy-sprite');
@@ -905,7 +984,7 @@
 
             await new Promise(r => setTimeout(r, 1000));
 
-            const enemyMove = gameState.enemy.moves[Math.floor(Math.random() * gameState.enemy.moves.length)];
+            const enemyMove = chooseEnemyMove();
             await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
 
             const enemyDmg = enemyMove.power + Math.floor(Math.random() * 6);
