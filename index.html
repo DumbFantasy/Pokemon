@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Type Effectiveness Edition</title>
+    <title>Pokémon Battle Simulator - Mimikyu Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -244,7 +244,7 @@
         <!-- PANTALLA DE SELECCIÓN DE POKÉMON -->
         <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-4 flex flex-col justify-center items-center">
             <h2 class="text-xs sm:text-sm text-amber-400 font-bold mb-3 tracking-widest text-center">ELIGE A TU POKÉMON INICIAL</h2>
-            <div id="pokemon-roster" class="grid grid-cols-2 sm:grid-cols-5 gap-2 w-full max-w-lg">
+            <div id="pokemon-roster" class="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
                 <!-- Se llena por JavaScript -->
             </div>
         </div>
@@ -317,7 +317,7 @@
 
     </div>
 
-    <!-- SCRIPT DE AUDIO Y TABLA DE TIPOS -->
+    <!-- SCRIPT DE AUDIO, TIPOS Y JUEGO -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let bgmInterval = null;
@@ -325,17 +325,14 @@
         let isPlaying = false;
         let currentTrack = 'menu';
 
-        // --- MATRIZ DE EFECTIVIDAD DE TIPOS ---
         const TYPE_CHART = {
             electric: { water: 2.0, grass: 0.5, electric: 0.5 },
             fire:     { grass: 2.0, fire: 0.5, water: 0.5 },
             water:    { fire: 2.0, water: 0.5, grass: 0.5 },
             grass:    { water: 2.0, fire: 0.5, grass: 0.5 },
-            ghost:    { ghost: 2.0, normal: 0.0 },
-            normal:   { ghost: 0.0 },
-            ice:      { grass: 2.0, water: 0.5, fire: 0.5 },
-            psychic:  { },
-            poison:   { grass: 2.0 }
+            ghost:    { ghost: 2.0, psychic: 2.0, normal: 0.0 },
+            fairy:    { fighting: 2.0, dragon: 2.0, fire: 0.5, poison: 0.5 },
+            normal:   { ghost: 0.0 }
         };
 
         function getEffectiveness(moveType, targetType) {
@@ -561,6 +558,21 @@
                     { name: "PSÍQUICO", type: "psychic", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
                     { name: "RAYO", type: "electric", power: 65, accuracy: 0.95, pp: 10, maxPp: 10 }
                 ]
+            },
+            {
+                id: 778,
+                name: "MIMIKYU",
+                type: "ghost",
+                hp: 150,
+                maxHp: 150,
+                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/778.gif",
+                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/778.gif",
+                moves: [
+                    { name: "GARRA UMBRÍA", type: "ghost", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "CARANTOÑA", type: "fairy", power: 70, accuracy: 0.90, pp: 10, maxPp: 10 },
+                    { name: "SOMBRA VIL", type: "ghost", power: 30, accuracy: 1.0, pp: 30, maxPp: 30 },
+                    { name: "GARRA BRUTAL", type: "normal", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 }
+                ]
             }
         ];
 
@@ -751,7 +763,6 @@
             document.getElementById('potion-count').innerText = gameState.player.potions;
 
             gameState.player.moves.forEach((m, idx) => {
-                document.getElementById(`move-name-${idx}`).innerText = m.name;
                 document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
             });
         }
@@ -825,7 +836,6 @@
 
             await new Promise(r => setTimeout(r, 800));
 
-            // TURNO ENEMIGO
             const enemyMove = gameState.enemy.moves[Math.floor(Math.random() * gameState.enemy.moves.length)];
             await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
 
