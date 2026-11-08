@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Kanto Legends Edition</title>
+    <title>Pokémon Battle Simulator - Ultimate Kanto Pokedex</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -399,21 +399,22 @@
         }
 
         const TYPE_CHART = {
-            electric: { water: 2.0, grass: 0.5, electric: 0.5, flying: 2.0 },
-            fire:     { grass: 2.0, fire: 0.5, water: 0.5, ice: 2.0 },
+            electric: { water: 2.0, grass: 0.5, electric: 0.5, flying: 2.0, ground: 0.0 },
+            fire:     { grass: 2.0, fire: 0.5, water: 0.5, ice: 2.0, bug: 2.0, rock: 0.5 },
             water:    { fire: 2.0, water: 0.5, grass: 0.5, ground: 2.0, rock: 2.0 },
-            grass:    { water: 2.0, fire: 0.5, grass: 0.5, ground: 2.0, rock: 2.0 },
+            grass:    { water: 2.0, fire: 0.5, grass: 0.5, ground: 2.0, rock: 2.0, flying: 0.5, poison: 0.5, bug: 0.5 },
             ghost:    { ghost: 2.0, psychic: 2.0, normal: 0.0 },
             fairy:    { fighting: 2.0, dragon: 2.0, fire: 0.5, poison: 0.5 },
-            normal:   { ghost: 0.0 },
-            fighting: { normal: 2.0, psychic: 0.5, ghost: 0.0, rock: 2.0, ice: 2.0 },
+            normal:   { ghost: 0.0, rock: 0.5 },
+            fighting: { normal: 2.0, psychic: 0.5, ghost: 0.0, rock: 2.0, ice: 2.0, flying: 0.5, poison: 0.5 },
             psychic:  { fighting: 2.0, psychic: 0.5, poison: 2.0 },
             ice:      { grass: 2.0, water: 0.5, fire: 0.5, dragon: 2.0, flying: 2.0, ground: 2.0 },
-            poison:   { grass: 2.0, poison: 0.5, ground: 0.5, rock: 0.5 },
-            ground:   { fire: 2.0, electric: 2.0, poison: 2.0, rock: 2.0, grass: 0.5, flying: 0.0 },
-            rock:     { fire: 2.0, ice: 2.0, flying: 2.0, fighting: 0.5, ground: 0.5 },
-            flying:   { grass: 2.0, fighting: 2.0, electric: 0.5, rock: 0.5 },
-            dragon:   { dragon: 2.0 }
+            poison:   { grass: 2.0, poison: 0.5, ground: 0.5, rock: 0.5, fairy: 2.0 },
+            ground:   { fire: 2.0, electric: 2.0, poison: 2.0, rock: 2.0, grass: 0.5, flying: 0.0, bug: 0.5 },
+            rock:     { fire: 2.0, ice: 2.0, flying: 2.0, fighting: 0.5, ground: 0.5, bug: 2.0 },
+            flying:   { grass: 2.0, fighting: 2.0, electric: 0.5, rock: 0.5, bug: 2.0 },
+            dragon:   { dragon: 2.0 },
+            bug:      { grass: 2.0, psychic: 2.0, fire: 0.5, fighting: 0.5, flying: 0.5, poison: 0.5 }
         };
 
         function getEffectiveness(moveType, targetType) {
@@ -565,11 +566,7 @@
         }
 
         const MEWTWO_POKEMON = {
-            id: 150,
-            name: "MEWTWO",
-            type: "psychic",
-            hp: 150,
-            maxHp: 150,
+            id: 150, name: "MEWTWO", type: "psychic", hp: 150, maxHp: 150,
             spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/150.gif",
             spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/150.gif",
             moves: [
@@ -580,173 +577,103 @@
             ]
         };
 
-        const POKEMON_LIST = [
-            {
-                id: 25, name: "PIKACHU", type: "electric", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/25.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif",
-                moves: [
-                    { name: "RAYO", type: "electric", power: 45, accuracy: 0.98, pp: 15, maxPp: 15 },
-                    { name: "ATAQUE RÁPIDO", type: "normal", power: 30, accuracy: 1.0, pp: 30, maxPp: 30 },
-                    { name: "COLA FÉRREA", type: "normal", power: 50, accuracy: 0.90, pp: 15, maxPp: 15 },
-                    { name: "TRUENO", type: "electric", power: 70, accuracy: 0.85, pp: 10, maxPp: 10 }
-                ]
-            },
-            {
-                id: 6, name: "CHARIZARD", type: "fire", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/6.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif",
-                moves: [
-                    { name: "LANZALLAMAS", type: "fire", power: 45, accuracy: 0.98, pp: 15, maxPp: 15 },
-                    { name: "GARRA DRAGÓN", type: "normal", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "VUELO", type: "normal", power: 50, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "LLAMARADA", type: "fire", power: 70, accuracy: 0.85, pp: 5, maxPp: 5 }
-                ]
-            },
-            {
-                id: 9, name: "BLASTOISE", type: "water", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/9.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif",
-                moves: [
-                    { name: "SURF", type: "water", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "HIDROBOMBA", type: "water", power: 70, accuracy: 0.90, pp: 5, maxPp: 5 },
-                    { name: "MORDISCO", type: "normal", power: 35, accuracy: 1.0, pp: 25, maxPp: 25 },
-                    { name: "RAYO HIELO", type: "ice", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 }
-                ]
-            },
-            {
-                id: 3, name: "VENUSAUR", type: "grass", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/3.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/3.gif",
-                moves: [
-                    { name: "LÁTIGO CEPA", type: "grass", power: 40, accuracy: 1.0, pp: 20, maxPp: 20 },
-                    { name: "GIGADRENADO", type: "grass", power: 50, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "BOMBA LODAZAL", type: "poison", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "RAYO SOLAR", type: "grass", power: 75, accuracy: 0.90, pp: 5, maxPp: 5 }
-                ]
-            },
-            {
-                id: 57, name: "PRIMEAPE", type: "fighting", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/57.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/57.gif",
-                moves: [
-                    { name: "TAJO CRUZADO", type: "fighting", power: 65, accuracy: 0.90, pp: 10, maxPp: 10 },
-                    { name: "PUÑO FUEGO", type: "fire", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "ACOMETIDA", type: "fighting", power: 40, accuracy: 1.0, pp: 20, maxPp: 20 },
-                    { name: "GOLPE BIS", type: "normal", power: 50, accuracy: 0.95, pp: 15, maxPp: 15 }
-                ]
-            },
-            {
-                id: 94, name: "GENGAR", type: "ghost", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/94.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/94.gif",
-                moves: [
-                    { name: "BOLA SOMBRA", type: "ghost", power: 50, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "COLMILLO VEN", type: "poison", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "PSÍQUICO", type: "psychic", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "RAYO", type: "electric", power: 65, accuracy: 0.95, pp: 10, maxPp: 10 }
-                ]
-            },
-            {
-                id: 778, name: "MIMIKYU", type: "ghost", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/778.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/778.gif",
-                moves: [
-                    { name: "GARRA UMBRÍA", type: "ghost", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "CARANTOÑA", type: "fairy", power: 70, accuracy: 0.90, pp: 10, maxPp: 10 },
-                    { name: "SOMBRA VIL", type: "ghost", power: 30, accuracy: 1.0, pp: 30, maxPp: 30 },
-                    { name: "GARRA BRUTAL", type: "normal", power: 40, accuracy: 1.0, pp: 15, maxPp: 15 }
-                ]
-            },
-            {
-                id: 130, name: "GYARADOS", type: "water", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/130.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/130.gif",
-                moves: [
-                    { name: "HIDROBOMBA", type: "water", power: 75, accuracy: 0.90, pp: 5, maxPp: 5 },
-                    { name: "TRITURAR", type: "normal", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "CASCADA", type: "water", power: 50, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "FURIA DRAGÓN", type: "dragon", power: 60, accuracy: 1.0, pp: 10, maxPp: 10 }
-                ]
-            },
-            {
-                id: 34, name: "NIDOKING", type: "poison", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/34.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/34.gif",
-                moves: [
-                    { name: "TERREMOTO", type: "ground", power: 75, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "DIRECTO TÓXICO", type: "poison", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "RAYO HIELO", type: "ice", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "GARRA DRAGÓN", type: "dragon", power: 50, accuracy: 1.0, pp: 15, maxPp: 15 }
-                ]
-            },
-            {
-                id: 18, name: "PIDGEOT", type: "flying", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/18.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/18.gif",
-                moves: [
-                    { name: "ATAQUE RÁPIDO", type: "normal", power: 30, accuracy: 1.0, pp: 30, maxPp: 30 },
-                    { name: "GOLPE AÉREO", type: "flying", power: 50, accuracy: 1.0, pp: 20, maxPp: 20 },
-                    { name: "PÁJARO OSADO", type: "flying", power: 75, accuracy: 0.90, pp: 10, maxPp: 10 },
-                    { name: "TORNADO", type: "flying", power: 45, accuracy: 1.0, pp: 20, maxPp: 20 }
-                ]
-            },
-            {
-                id: 131, name: "LAPRAS", type: "water", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/131.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/131.gif",
-                moves: [
-                    { name: "RAYO HIELO", type: "ice", power: 60, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "SURF", type: "water", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "RAYO", type: "electric", power: 65, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "VENTISCA", type: "ice", power: 75, accuracy: 0.85, pp: 5, maxPp: 5 }
-                ]
-            },
-            {
-                id: 149, name: "DRAGONITE", type: "dragon", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/149.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/149.gif",
-                moves: [
-                    { name: "GARRA DRAGÓN", type: "dragon", power: 60, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "VELOCIDAD EXTREMA", type: "normal", power: 50, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "LANZALLAMAS", type: "fire", power: 55, accuracy: 0.98, pp: 15, maxPp: 15 },
-                    { name: "RAYO", type: "electric", power: 65, accuracy: 0.95, pp: 10, maxPp: 10 }
-                ]
-            },
-            {
-                id: 76, name: "GOLEM", type: "rock", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/76.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/76.gif",
-                moves: [
-                    { name: "TERREMOTO", type: "ground", power: 75, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "LANZARROCAS", type: "rock", power: 50, accuracy: 0.90, pp: 15, maxPp: 15 },
-                    { name: "RODADA", type: "rock", power: 60, accuracy: 0.90, pp: 15, maxPp: 15 },
-                    { name: "GOLPE", type: "normal", power: 45, accuracy: 1.0, pp: 20, maxPp: 20 }
-                ]
-            },
-            {
-                id: 80, name: "SLOWBRO", type: "psychic", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/80.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/80.gif",
-                moves: [
-                    { name: "PSÍQUICO", type: "psychic", power: 60, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "SURF", type: "water", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 },
-                    { name: "RAYO HIELO", type: "ice", power: 55, accuracy: 0.95, pp: 10, maxPp: 10 },
-                    { name: "CABEZAZO ZEN", type: "psychic", power: 50, accuracy: 1.0, pp: 15, maxPp: 15 }
-                ]
-            },
-            {
-                id: 68, name: "MACHAMP", type: "fighting", hp: 150, maxHp: 150,
-                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/68.gif",
-                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/68.gif",
-                moves: [
-                    { name: "TAJO CRUZADO", type: "fighting", power: 70, accuracy: 0.90, pp: 10, maxPp: 10 },
-                    { name: "PUNETAZO", type: "fighting", power: 50, accuracy: 1.0, pp: 20, maxPp: 20 },
-                    { name: "TERREMOTO", type: "ground", power: 75, accuracy: 1.0, pp: 10, maxPp: 10 },
-                    { name: "LANZARROCAS", type: "rock", power: 50, accuracy: 0.90, pp: 15, maxPp: 15 }
-                ]
-            }
+        const RAW_POKEDEX = [
+            { id: 25, name: "PIKACHU", type: "electric", m: ["RAYO", "TRUENO", "ATAQUE RÁPIDO", "COLA FÉRREA"] },
+            { id: 26, name: "RAICHU", type: "electric", m: ["TRUENO", "RAYO", "PUÑO TRUENO", "HIPERRAYO"] },
+            { id: 6, name: "CHARIZARD", type: "fire", m: ["LANZALLAMAS", "LLAMARADA", "VUELO", "GARRA DRAGÓN"] },
+            { id: 9, name: "BLASTOISE", type: "water", m: ["SURF", "HIDROBOMBA", "RAYO HIELO", "MORDISCO"] },
+            { id: 3, name: "VENUSAUR", type: "grass", m: ["RAYO SOLAR", "GIGADRENADO", "LÁTIGO CEPA", "BOMBA LODAZAL"] },
+            { id: 57, name: "PRIMEAPE", type: "fighting", m: ["TAJO CRUZADO", "PUÑO FUEGO", "ACOMETIDA", "GOLPE BIS"] },
+            { id: 94, name: "GENGAR", type: "ghost", m: ["BOLA SOMBRA", "PSÍQUICO", "COLMILLO VEN", "RAYO"] },
+            { id: 778, name: "MIMIKYU", type: "ghost", m: ["CARANTOÑA", "GARRA UMBRÍA", "SOMBRA VIL", "GARRA BRUTAL"] },
+            { id: 130, name: "GYARADOS", type: "water", m: ["HIDROBOMBA", "TRITURAR", "CASCADA", "FURIA DRAGÓN"] },
+            { id: 34, name: "NIDOKING", type: "poison", m: ["TERREMOTO", "DIRECTO TÓXICO", "RAYO HIELO", "GARRA DRAGÓN"] },
+            { id: 31, name: "NIDOQUEEN", type: "poison", m: ["TERREMOTO", "BOMBA LODAZAL", "SUPERPODER", "ROCA AFILADA"] },
+            { id: 18, name: "PIDGEOT", type: "flying", m: ["PÁJARO OSADO", "GOLPE AÉREO", "TORNADO", "ATAQUE RÁPIDO"] },
+            { id: 131, name: "LAPRAS", type: "water", m: ["RAYO HIELO", "VENTISCA", "SURF", "RAYO"] },
+            { id: 149, name: "DRAGONITE", type: "dragon", m: ["GARRA DRAGÓN", "VELOCIDAD EXTREMA", "LANZALLAMAS", "RAYO"] },
+            { id: 76, name: "GOLEM", type: "rock", m: ["TERREMOTO", "LANZARROCAS", "RODADA", "GOLPE"] },
+            { id: 80, name: "SLOWBRO", type: "psychic", m: ["PSÍQUICO", "SURF", "RAYO HIELO", "CABEZAZO ZEN"] },
+            { id: 68, name: "MACHAMP", type: "fighting", m: ["TAJO CRUZADO", "PUNETAZO", "TERREMOTO", "LANZARROCAS"] },
+            { id: 105, name: "MAROWAK", type: "ground", m: ["HUESOMERANG", "TERREMOTO", "GOLPE CABEZA", "ROCA AFILADA"] },
+            { id: 115, name: "KANGASKHAN", type: "normal", m: ["SORPRESA", "GOLPE CUERPO", "TERREMOTO", "TRITURAR"] },
+            { id: 24, name: "ARBOK", type: "poison", m: ["COLMILLO VEN", "TERREMOTO", "TRITURAR", "GOLPE DE COBRA"] },
+            { id: 110, name: "WEEZING", type: "poison", m: ["BOMBA LODAZAL", "PIROTECNIA", "BOLA SOMBRA", "EXPLOSIÓN"] },
+            { id: 121, name: "STARMIE", type: "water", m: ["SURF", "PSÍQUICO", "RAYO HIELO", "RAYO"] },
+            { id: 122, name: "MR. MIME", type: "psychic", m: ["PSÍQUICO", "BRICOLAJE", "BOLA SOMBRA", "BRILLO MÁGICO"] },
+            { id: 141, name: "KABUTOPS", type: "rock", m: ["CASCADA", "ROCA AFILADA", "TRACTOR", "CORTAFUEGO"] },
+            { id: 139, name: "OMASTAR", type: "water", m: ["HIDROBOMBA", "PODER GEMELO", "RAYO HIELO", "TIERRA VIVA"] },
+            { id: 137, name: "PORYGON", type: "normal", m: ["TRIATAC", "PSÍQUICO", "RAYO", "RAYO HIELO"] },
+            { id: 134, name: "VAPOREON", type: "water", m: ["SURF", "HIDROBOMBA", "RAYO HIELO", "BOLA SOMBRA"] },
+            { id: 136, name: "FLAREON", type: "fire", m: ["ENVIDIA FUEGO", "LANZALLAMAS", "GOLPE CUERPO", "MORDISCO"] },
+            { id: 135, name: "JOLTEON", type: "electric", m: ["RAYO", "VOLTIOCAMBIO", "BOLA SOMBRA", "PIN MISIL"] },
+            { id: 143, name: "SNORLAX", type: "normal", m: ["GOLPE CUERPO", "TERREMOTO", "TRITURAR", "PUÑO HIELO"] },
+            { id: 142, name: "AERODACTYL", type: "rock", m: ["ROCA AFILADA", "GOLPE AÉREO", "COLMILLO ÍGNEO", "TERREMOTO"] },
+            { id: 132, name: "DITTO", type: "normal", m: ["TRANSFORMACIÓN", "GOLPE CUERPO", "ATAQUE RÁPIDO", "COLA FÉRREA"] },
+            { id: 128, name: "TAUROS", type: "normal", m: ["GOLPE CUERPO", "TERREMOTO", "ROCA AFILADA", "EMBESTIDA"] },
+            { id: 127, name: "PINSIR", type: "bug", m: ["TIJERAX", "GUILLOTINA", "SUPERPODER", "ROCA AFILADA"] },
+            { id: 123, name: "SCYTHER", type: "bug", m: ["TIJERAX", "GOLPE AÉREO", "ATAQUE RÁPIDO", "CORTAFUEGO"] },
+            { id: 125, name: "ELECTABUZZ", type: "electric", m: ["RAYO", "PUÑO TRUENO", "PSÍQUICO", "PUÑO FUEGO"] },
+            { id: 126, name: "MAGMAR", type: "fire", m: ["LANZALLAMAS", "PUÑO FUEGO", "PSÍQUICO", "BOMBA LODAZAL"] },
+            { id: 124, name: "JYNX", type: "ice", m: ["BESO HIELO", "PSÍQUICO", "RAYO HIELO", "BOLA SOMBRA"] },
+            { id: 119, name: "SEAKING", type: "water", m: ["CASCADA", "MEGA CUERNO", "RAYO HIELO", "PICOTAZO"] },
+            { id: 99, name: "KINGLER", type: "water", m: ["MARTILLAZO", "MARTILLO AGUA", "GUILLOTINA", "SUPERPODER"] },
+            { id: 112, name: "RHYDON", type: "ground", m: ["TERREMOTO", "ROCA AFILADA", "MEGA CUERNO", "PERFORADOR"] },
+            { id: 107, name: "HITMONCHAN", type: "fighting", m: ["ULTRA PUÑO", "PUÑO FUEGO", "PUÑO HIELO", "PUÑO TRUENO"] },
+            { id: 106, name: "HITMONLEE", type: "fighting", m: ["PATADA ALTA", "PATADA SALTO", "TERREMOTO", "ROCA AFILADA"] },
+            { id: 103, name: "EXEGGUTOR", type: "grass", m: ["PSÍQUICO", "RAYO SOLAR", "BOMBA GERMEN", "BOLA SOMBRA"] },
+            { id: 108, name: "LICKITUNG", type: "normal", m: ["PISOTÓN", "LETARGO", "SURF", "LANZALLAMAS"] },
+            { id: 101, name: "ELECTRODE", type: "electric", m: ["RAYO", "VOLTIOCAMBIO", "EXPLOSIÓN", "BOLA SOMBRA"] },
+            { id: 97, name: "HYPNO", type: "psychic", m: ["PSÍQUICO", "BOLA SOMBRA", "CABEZAZO ZEN", "PUÑO TRUENO"] },
+            { id: 95, name: "ONIX", type: "rock", m: ["LANZARROCAS", "TERREMOTO", "TUMBA ROCAS", "GOLPE CUERPO"] },
+            { id: 91, name: "CLOYSTER", type: "water", m: ["CHUZOS", "HIDROBOMBA", "RAYO HIELO", "CONCHA ATAQUE"] },
+            { id: 89, name: "MUK", type: "poison", m: ["BOMBA LODAZAL", "PUÑO SOMBRA", "DIRECTO TÓXICO", "TERREMOTO"] },
+            { id: 87, name: "DEWGONG", type: "water", m: ["RAYO HIELO", "SURF", "CHUZOS", "GOLPE CUERPO"] },
+            { id: 85, name: "DODRIO", type: "normal", m: ["PICO TALADRO", "PÁJARO OSADO", "GOLPE CUERPO", "ATAQUE RÁPIDO"] },
+            { id: 83, name: "FARFETCHD", type: "normal", m: ["HOJA AFILADA", "GOLPE AÉREO", "CORTE", "ATAQUE RÁPIDO"] },
+            { id: 82, name: "MAGNETON", type: "electric", m: ["RAYO", "FOCO RESPLANDOR", "VOLTIOCAMBIO", "TRIATAC"] },
+            { id: 78, name: "RAPIDASH", type: "fire", m: ["ENVIDIA FUEGO", "LANZALLAMAS", "BOTAFUEGO", "PISOTÓN"] },
+            { id: 73, name: "TENTACRUEL", type: "water", m: ["HIDROBOMBA", "BOMBA LODAZAL", "RAYO HIELO", "SURF"] },
+            { id: 71, name: "VICTREEBEL", type: "grass", m: ["HOJA AFILADA", "BOMBA LODAZAL", "GIGADRENADO", "AZOTE"] },
+            { id: 65, name: "ALAKAZAM", type: "psychic", m: ["PSÍQUICO", "BOLA SOMBRA", "ONDA CERTERA", "BRILLO MÁGICO"] },
+            { id: 62, name: "POLIWRATH", type: "water", m: ["PUÑO DINÁMICO", "SURF", "HIDROBOMBA", "PUÑO HIELO"] },
+            { id: 59, name: "ARCANINE", type: "fire", m: ["BOTAFUEGO", "LANZALLAMAS", "VELOCIDAD EXTREMA", "TRITURAR"] },
+            { id: 55, name: "GOLDUCK", type: "water", m: ["SURF", "HIDROBOMBA", "PSÍQUICO", "RAYO HIELO"] },
+            { id: 53, name: "PERSIAN", type: "normal", m: ["SORPRESA", "CORTAFUEGO", "JUEGO SUCIO", "VALIENTE"] },
+            { id: 51, name: "DUGTRIO", type: "ground", m: ["TERREMOTO", "ROCA AFILADA", "TUMBA ROCAS", "GARRA UMBRÍA"] },
+            { id: 49, name: "VENOMOTH", type: "bug", m: ["ZUMBIDO", "BOMBA LODAZAL", "PSÍQUICO", "CORTAFUEGO"] },
+            { id: 47, name: "PARASECT", type: "grass", m: ["TIJERAX", "BOMBA GERMEN", "GIGADRENADO", "CORTE"] },
+            { id: 45, name: "VILEPLUME", type: "grass", m: ["BOMBA LODAZAL", "RAYO SOLAR", "GIGADRENADO", "BRILLO MÁGICO"] },
+            { id: 42, name: "GOLBAT", type: "poison", m: ["VENENO CRUZADO", "GOLPE AÉREO", "COLMILLO VEN", "TORNADO"] },
+            { id: 40, name: "WIGGLYTUFF", type: "normal", m: ["VOZARRÓN", "BRILLO MÁGICO", "GOLPE CUERPO", "BOLA SOMBRA"] },
+            { id: 38, name: "NINETALES", type: "fire", m: ["LANZALLAMAS", "LLAMARADA", "BOLA SOMBRA", "EXTRASENSORIAL"] },
+            { id: 36, name: "CLEFABLE", type: "fairy", m: ["BRILLO MÁGICO", "METRÓNOMO", "PSÍQUICO", "RAYO"] },
+            { id: 28, name: "SANDSLASH", type: "ground", m: ["TERREMOTO", "GARRA BRUTAL", "ROCA AFILADA", "TIJERAX"] },
+            { id: 22, name: "FEAROW", type: "normal", m: ["PICO TALADRO", "GOLPE AÉREO", "ATAQUE RÁPIDO", "FURIATAC"] },
+            { id: 20, name: "RATICATE", type: "normal", m: ["HIPERCOLMILLO", "GOLPE CUERPO", "TRITURAR", "ATAQUE RÁPIDO"] },
+            { id: 15, name: "BEEDRILL", type: "bug", m: ["DIRECTO TÓXICO", "TIJERAX", "PIN MISIL", "ACOMETIDA"] },
+            { id: 12, name: "BUTTERFREE", type: "bug", m: ["ZUMBIDO", "PSÍQUICO", "TORNADO", "GIGADRENADO"] }
         ];
+
+        const POKEMON_LIST = RAW_POKEDEX.map(p => {
+            return {
+                id: p.id,
+                name: p.name,
+                type: p.type,
+                hp: 150,
+                maxHp: 150,
+                spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/${p.id}.gif`,
+                spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${p.id}.gif`,
+                moves: p.m.map((moveName, i) => ({
+                    name: moveName,
+                    type: p.type,
+                    power: 45 + (i * 10),
+                    accuracy: 0.95 - (i * 0.02),
+                    pp: 15 - (i * 2),
+                    maxPp: 15 - (i * 2)
+                }))
+            };
+        });
 
         let gameState = {
             player: null,
@@ -945,6 +872,7 @@
             document.getElementById('potion-count').innerText = gameState.player.potions;
 
             gameState.player.moves.forEach((m, idx) => {
+                document.getElementById(`move-name-${idx}`).innerText = m.name;
                 document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
             });
         }
