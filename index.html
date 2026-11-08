@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Trainer Customizer</title>
+    <title>Pokémon Battle Simulator - Mewtwo Boss Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -245,28 +245,31 @@
         <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-3 flex flex-col justify-start items-center overflow-y-auto">
             
             <!-- SELECTOR DE AVATAR -->
-            <h2 class="text-[9px] text-amber-400 font-bold mb-1 tracking-widest text-center">ELIGIENDO AVATAR DE ENTRENADOR</h2>
+            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">ELIGIENDO AVATAR DE ENTRENADOR</h2>
             <div id="avatar-roster" class="flex gap-2 mb-2">
                 <!-- Se llena por JavaScript -->
             </div>
 
             <!-- SELECTOR DE DIFICULTAD -->
-            <h2 class="text-[9px] text-amber-400 font-bold mb-1 tracking-widest text-center">DIFICULTAD RIVAL</h2>
-            <div class="flex gap-1.5 mb-2">
-                <button onclick="setDifficulty('easy')" id="btn-diff-easy" class="px-2.5 py-1 bg-emerald-600 border-2 border-emerald-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5">
+            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">DIFICULTAD RIVAL</h2>
+            <div class="flex flex-wrap justify-center gap-1.5 mb-2">
+                <button onclick="setDifficulty('easy')" id="btn-diff-easy" class="px-2 py-1 bg-emerald-600 border-2 border-emerald-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5">
                     😊 FÁCIL
                 </button>
-                <button onclick="setDifficulty('medium')" id="btn-diff-medium" class="px-2.5 py-1 bg-amber-600 border-2 border-amber-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
+                <button onclick="setDifficulty('medium')" id="btn-diff-medium" class="px-2 py-1 bg-amber-600 border-2 border-amber-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
                     🚀 INTERMEDIO
                 </button>
-                <button onclick="setDifficulty('hard')" id="btn-diff-hard" class="px-2.5 py-1 bg-red-600 border-2 border-red-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
+                <button onclick="setDifficulty('hard')" id="btn-diff-hard" class="px-2 py-1 bg-red-600 border-2 border-red-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
                     👑 DIFÍCIL
+                </button>
+                <button onclick="setDifficulty('boss')" id="btn-diff-boss" class="px-2 py-1 bg-purple-700 border-2 border-purple-300 text-yellow-300 text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60 animate-pulse">
+                    🔮 IMPOSIBLE (Mewtwo)
                 </button>
             </div>
 
             <!-- SELECTOR DE POKÉMON -->
-            <h2 class="text-[9px] text-amber-400 font-bold mb-1 tracking-widest text-center">ELIGE TU POKÉMON</h2>
-            <div id="pokemon-roster" class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 w-full max-w-lg">
+            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">ELIGE TU POKÉMON</h2>
+            <div id="pokemon-roster" class="grid grid-cols-4 sm:grid-cols-7 gap-1.5 w-full max-w-lg">
                 <!-- Se llena por JavaScript -->
             </div>
         </div>
@@ -348,7 +351,6 @@
         let currentTrack = 'menu';
         let currentDifficulty = 'easy';
 
-        // LISTA DE AVATARES DE ENTRENADORES (Chicos y Chicas)
         const AVATARS = [
             { id: 'ethan', name: 'Ethan', sprite: 'https://play.pokemonshowdown.com/sprites/trainers/ethan.png' },
             { id: 'red', name: 'Rojo', sprite: 'https://play.pokemonshowdown.com/sprites/trainers/red.png' },
@@ -363,7 +365,8 @@
         const TRAINERS = {
             easy: { name: "CHICO RUTA 1", sprite: "https://play.pokemonshowdown.com/sprites/trainers/youngster.png" },
             medium: { name: "RECLUTA ROCKET", sprite: "https://play.pokemonshowdown.com/sprites/trainers/teamrocket-gruntf.png" },
-            hard: { name: "CAMPEONA CYNTHIA", sprite: "https://play.pokemonshowdown.com/sprites/trainers/cynthia.png" }
+            hard: { name: "CAMPEONA CYNTHIA", sprite: "https://play.pokemonshowdown.com/sprites/trainers/cynthia.png" },
+            boss: { name: "JEFE GIOVANNI", sprite: "https://play.pokemonshowdown.com/sprites/trainers/giovanni.png" }
         };
 
         function setDifficulty(diff) {
@@ -372,6 +375,7 @@
             document.getElementById('btn-diff-easy').style.opacity = (diff === 'easy') ? '1' : '0.6';
             document.getElementById('btn-diff-medium').style.opacity = (diff === 'medium') ? '1' : '0.6';
             document.getElementById('btn-diff-hard').style.opacity = (diff === 'hard') ? '1' : '0.6';
+            document.getElementById('btn-diff-boss').style.opacity = (diff === 'boss') ? '1' : '0.6';
         }
 
         function selectAvatar(id) {
@@ -387,7 +391,7 @@
                 const isSelected = (selectedAvatar.id === a.id);
                 container.innerHTML += `
                     <button onclick="selectAvatar('${a.id}')" class="gba-box p-1 flex flex-col items-center transition-all ${isSelected ? 'border-amber-400 bg-slate-700 scale-105' : 'opacity-70 hover:opacity-100'}">
-                        <img src="${a.sprite}" alt="${a.name}" class="w-10 h-10 object-contain pixel-sprite">
+                        <img src="${a.sprite}" alt="${a.name}" class="w-8 h-8 object-contain pixel-sprite">
                         <span class="text-[6px] font-bold text-amber-200 mt-0.5">${a.name}</span>
                     </button>
                 `;
@@ -396,12 +400,16 @@
 
         const TYPE_CHART = {
             electric: { water: 2.0, grass: 0.5, electric: 0.5 },
-            fire:     { grass: 2.0, fire: 0.5, water: 0.5 },
+            fire:     { grass: 2.0, fire: 0.5, water: 0.5, ice: 2.0 },
             water:    { fire: 2.0, water: 0.5, grass: 0.5 },
             grass:    { water: 2.0, fire: 0.5, grass: 0.5 },
             ghost:    { ghost: 2.0, psychic: 2.0, normal: 0.0 },
             fairy:    { fighting: 2.0, dragon: 2.0, fire: 0.5, poison: 0.5 },
-            normal:   { ghost: 0.0 }
+            normal:   { ghost: 0.0 },
+            fighting: { normal: 2.0, psychic: 0.5, ghost: 0.0 },
+            psychic:  { fighting: 2.0, psychic: 0.5 },
+            ice:      { grass: 2.0, water: 0.5, fire: 0.5 },
+            poison:   { grass: 2.0 }
         };
 
         function getEffectiveness(moveType, targetType) {
@@ -552,6 +560,22 @@
             }
         }
 
+        const MEWTWO_POKEMON = {
+            id: 150,
+            name: "MEWTWO",
+            type: "psychic",
+            hp: 150,
+            maxHp: 150,
+            spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/150.gif",
+            spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/150.gif",
+            moves: [
+                { name: "ONDA MENTAL", type: "psychic", power: 65, accuracy: 1.0, pp: 10, maxPp: 10 },
+                { name: "ESFERA AURAL", type: "fighting", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 },
+                { name: "RAYO HIELO", type: "ice", power: 55, accuracy: 1.0, pp: 10, maxPp: 10 },
+                { name: "BOLA SOMBRA", type: "ghost", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 }
+            ]
+        };
+
         const POKEMON_LIST = [
             {
                 id: 25,
@@ -614,6 +638,21 @@
                 ]
             },
             {
+                id: 57,
+                name: "PRIMEAPE",
+                type: "fighting",
+                hp: 150,
+                maxHp: 150,
+                spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/57.gif",
+                spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/57.gif",
+                moves: [
+                    { name: "TAJO CRUZADO", type: "fighting", power: 65, accuracy: 0.90, pp: 10, maxPp: 10 },
+                    { name: "PUÑO FUEGO", type: "fire", power: 45, accuracy: 1.0, pp: 15, maxPp: 15 },
+                    { name: "ACOMETIDA", type: "fighting", power: 40, accuracy: 1.0, pp: 20, maxPp: 20 },
+                    { name: "GOLPE BIS", type: "normal", power: 50, accuracy: 0.95, pp: 15, maxPp: 15 }
+                ]
+            },
+            {
                 id: 94,
                 name: "GENGAR",
                 type: "ghost",
@@ -657,9 +696,9 @@
             roster.innerHTML = '';
             POKEMON_LIST.forEach((p, idx) => {
                 roster.innerHTML += `
-                    <button onclick="selectPokemon(${idx})" class="gba-box p-1.5 flex flex-col items-center hover:bg-slate-700 active:translate-y-0.5 transition-all">
-                        <img src="${p.spriteFront}" alt="${p.name}" class="w-10 h-10 pixel-sprite mb-0.5">
-                        <span class="text-[7px] font-bold text-amber-300">${p.name}</span>
+                    <button onclick="selectPokemon(${idx})" class="gba-box p-1 flex flex-col items-center hover:bg-slate-700 active:translate-y-0.5 transition-all">
+                        <img src="${p.spriteFront}" alt="${p.name}" class="w-8 h-8 pixel-sprite mb-0.5">
+                        <span class="text-[6px] font-bold text-amber-300">${p.name}</span>
                     </button>
                 `;
             });
@@ -672,14 +711,17 @@
             const chosen = POKEMON_LIST[index];
             gameState.player = JSON.parse(JSON.stringify(chosen));
             
-            let enemyIndex;
-            do {
-                enemyIndex = Math.floor(Math.random() * POKEMON_LIST.length);
-            } while (POKEMON_LIST.length > 1 && POKEMON_LIST[enemyIndex].name === chosen.name);
-            
-            gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
+            if (currentDifficulty === 'boss') {
+                // Modo Imposible: El rival SIEMPRE es Mewtwo
+                gameState.enemy = JSON.parse(JSON.stringify(MEWTWO_POKEMON));
+            } else {
+                let enemyIndex;
+                do {
+                    enemyIndex = Math.floor(Math.random() * POKEMON_LIST.length);
+                } while (POKEMON_LIST.length > 1 && POKEMON_LIST[enemyIndex].name === chosen.name);
+                gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
+            }
 
-            // Configurar Entrenador Rival y Jugador según selección
             const trainerData = TRAINERS[currentDifficulty];
             document.getElementById('vs-rival-name').innerText = trainerData.name;
             document.getElementById('vs-rival-img').src = trainerData.sprite;
@@ -840,6 +882,7 @@
             document.getElementById('potion-count').innerText = gameState.player.potions;
 
             gameState.player.moves.forEach((m, idx) => {
+                document.getElementById(`move-name-${idx}`).innerText = m.name;
                 document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
             });
         }
@@ -867,6 +910,7 @@
                 return moves[Math.floor(Math.random() * moves.length)];
             } 
             else {
+                // Cynthia y Boss Mewtwo calculan el daño óptimo absoluto
                 let bestMove = moves[0];
                 let maxScore = -1;
 
