@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Ultimate Kanto Pokedex</title>
+    <title>Pokémon Battle Simulator - 6v6 Team Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -147,7 +147,7 @@
         <div class="bg-slate-900 border-b-4 border-slate-800 px-3 py-2 flex items-center justify-between text-[10px]">
             <div class="flex items-center space-x-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-amber-400 font-bold tracking-wider">POKÉMON BATTLE SIMULATOR</span>
+                <span class="text-amber-400 font-bold tracking-wider">POKÉMON BATTLE SIMULATOR (6v6)</span>
             </div>
             <button id="bgm-toggle" onclick="toggleMusic()" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded border-2 border-amber-300 transition-all active:translate-y-0.5">
                 🎵 MÚSICA: OFF
@@ -164,7 +164,7 @@
             <div id="enemy-card" class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
                     <span id="enemy-name">CHARIZARD</span>
-                    <span id="enemy-level" class="text-slate-600">Nv50</span>
+                    <div id="enemy-team-dots" class="flex gap-0.5"></div>
                 </div>
                 <div class="flex items-center space-x-1">
                     <span class="text-[8px] font-black text-amber-600">PS</span>
@@ -197,7 +197,7 @@
             <div id="player-card" class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
                     <span id="player-name">PIKACHU</span>
-                    <span id="player-level" class="text-slate-600">Nv50</span>
+                    <div id="player-team-dots" class="flex gap-0.5"></div>
                 </div>
                 <div class="flex items-center space-x-1 mb-1">
                     <span class="text-[8px] font-black text-amber-600">PS</span>
@@ -206,11 +206,8 @@
                     </div>
                 </div>
                 <div class="flex justify-between items-center text-[8px] font-bold text-slate-700">
-                    <span class="text-sky-600">EXP</span>
+                    <span class="text-sky-600">EQUIPO</span>
                     <span><span id="player-hp-text">150/150</span></span>
-                </div>
-                <div class="w-full bg-slate-300 h-1 mt-0.5 rounded-sm overflow-hidden border border-slate-400">
-                    <div class="bg-sky-500 h-full w-3/4"></div>
                 </div>
             </div>
 
@@ -241,35 +238,41 @@
 
         </div>
 
-        <!-- PANTALLA DE SELECCIÓN DE AVATAR, DIFICULTAD Y POKÉMON -->
+        <!-- PANTALLA DE SELECCIÓN DE AVATAR, DIFICULTAD Y EQUIPO DE 6 -->
         <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-3 flex flex-col justify-start items-center overflow-y-auto">
             
             <!-- SELECTOR DE AVATAR -->
-            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">ELIGIENDO AVATAR DE ENTRENADOR</h2>
-            <div id="avatar-roster" class="flex gap-2 mb-2">
-                <!-- Se llena por JavaScript -->
-            </div>
+            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">1. ELIGE TU AVATAR</h2>
+            <div id="avatar-roster" class="flex gap-2 mb-2"></div>
 
             <!-- SELECTOR DE DIFICULTAD -->
-            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">DIFICULTAD RIVAL</h2>
+            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">2. DIFICULTAD RIVAL</h2>
             <div class="flex flex-wrap justify-center gap-1.5 mb-2">
-                <button onclick="setDifficulty('easy')" id="btn-diff-easy" class="px-2 py-1 bg-emerald-600 border-2 border-emerald-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5">
-                    😊 FÁCIL
-                </button>
-                <button onclick="setDifficulty('medium')" id="btn-diff-medium" class="px-2 py-1 bg-amber-600 border-2 border-amber-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
-                    🚀 INTERMEDIO
-                </button>
-                <button onclick="setDifficulty('hard')" id="btn-diff-hard" class="px-2 py-1 bg-red-600 border-2 border-red-300 text-white text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60">
-                    👑 DIFÍCIL
-                </button>
-                <button onclick="setDifficulty('boss')" id="btn-diff-boss" class="px-2 py-1 bg-purple-700 border-2 border-purple-300 text-yellow-300 text-[7px] font-bold rounded shadow active:translate-y-0.5 opacity-60 animate-pulse">
-                    🔮 IMPOSIBLE (Mewtwo)
-                </button>
+                <button onclick="setDifficulty('easy')" id="btn-diff-easy" class="px-2 py-1 bg-emerald-600 border-2 border-emerald-300 text-white text-[7px] font-bold rounded shadow">😊 FÁCIL</button>
+                <button onclick="setDifficulty('medium')" id="btn-diff-medium" class="px-2 py-1 bg-amber-600 border-2 border-amber-300 text-white text-[7px] font-bold rounded shadow opacity-60">🚀 INTERMEDIO</button>
+                <button onclick="setDifficulty('hard')" id="btn-diff-hard" class="px-2 py-1 bg-red-600 border-2 border-red-300 text-white text-[7px] font-bold rounded shadow opacity-60">👑 DIFÍCIL</button>
+                <button onclick="setDifficulty('boss')" id="btn-diff-boss" class="px-2 py-1 bg-purple-700 border-2 border-purple-300 text-yellow-300 text-[7px] font-bold rounded shadow opacity-60 animate-pulse">🔮 IMPOSIBLE (Mewtwo)</button>
             </div>
 
-            <!-- SELECTOR DE POKÉMON -->
-            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">ELIGE TU POKÉMON</h2>
-            <div id="pokemon-roster" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-lg">
+            <!-- PANEL DEL EQUIPO SELECCIONADO (6 SLOTS) -->
+            <div class="w-full max-w-lg gba-box p-2 mb-2 bg-slate-950/80">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-[8px] text-amber-300 font-bold">3. TU EQUIPO:</span>
+                    <span id="team-counter" class="text-[8px] font-bold text-sky-400">[ 0 / 6 ]</span>
+                </div>
+                <div id="selected-team-display" class="flex gap-1.5 justify-center min-h-[40px] items-center">
+                    <!-- Se renderizan las 6 ranuras -->
+                </div>
+            </div>
+
+            <!-- BOTÓN DE INICIAR COMBATE (DESACTIVADO HASTA TENER 6) -->
+            <button id="btn-start-battle" onclick="startBattle6v6()" disabled class="w-full max-w-xs py-2 bg-slate-700 text-slate-400 border-2 border-slate-600 font-black text-[10px] rounded shadow-md cursor-not-allowed transition-all mb-3">
+                ⚔️ SELECCIONA 6 POKÉMON
+            </button>
+
+            <!-- SELECTOR DE POKÉMON DISPONIBLES -->
+            <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">CATÁLOGO POKÉDEX</h2>
+            <div id="pokemon-roster" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-lg mb-4">
                 <!-- Se llena por JavaScript -->
             </div>
         </div>
@@ -278,7 +281,7 @@
         <div class="bg-slate-900 border-t-4 border-slate-700 p-2 sm:p-3 min-h-[150px] flex flex-col justify-between">
             
             <div id="dialog-box" class="gba-box p-3 text-[10px] sm:text-xs text-slate-100 min-h-[56px] flex items-center leading-relaxed tracking-wider vt323 text-lg">
-                <span id="typewriter-text">¡Elige tu avatar, dificultad y tu Pokémon!</span>
+                <span id="typewriter-text">¡Debes seleccionar 6 Pokémon para armar tu equipo de combate!</span>
             </div>
 
             <!-- MENÚ PRINCIPAL DE BATALLA -->
@@ -289,8 +292,8 @@
                 <button onclick="openBagMenu()" class="py-2.5 bg-amber-600 hover:bg-amber-500 border-2 border-amber-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
                     🎒 MOCHILA
                 </button>
-                <button onclick="returnToSelection()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
-                    👥 CAMBIAR POKÉMON
+                <button onclick="openSwitchMenu()" class="py-2.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
+                    🔄 CAMBIAR POKÉMON
                 </button>
                 <button onclick="handleRun()" class="py-2.5 bg-slate-700 hover:bg-slate-600 border-2 border-slate-400 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
                     🏃 HUIR
@@ -320,6 +323,11 @@
                 </button>
             </div>
 
+            <!-- SUB-MENÚ CAMBIAR POKÉMON EN BATALLA -->
+            <div id="switch-menu" class="hidden grid-cols-3 gap-1.5 mt-2">
+                <!-- Se llena dinámicamente con los 6 Pokémon del jugador -->
+            </div>
+
             <!-- SUB-MENÚ MOCHILA -->
             <div id="bag-menu" class="hidden flex-col gap-2 mt-2">
                 <div class="flex gap-2">
@@ -335,7 +343,7 @@
 
             <!-- MENÚ INICIAL VACÍO -->
             <div id="empty-menu" class="flex justify-center items-center mt-2">
-                <span class="text-[9px] text-amber-300 animate-pulse">¡Selecciona un Pokémon arriba para comenzar!</span>
+                <span class="text-[9px] text-amber-300 animate-pulse">¡Elige a tus 6 Pokémon para desbloquear el combate!</span>
             </div>
 
         </div>
@@ -361,6 +369,7 @@
         ];
 
         let selectedAvatar = AVATARS[0];
+        let selectedTeamIds = [];
 
         const TRAINERS = {
             easy: { name: "CHICO RUTA 1", sprite: "https://play.pokemonshowdown.com/sprites/trainers/youngster.png" },
@@ -433,38 +442,25 @@
         const MENU_NOTES = [
             { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
             { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 },
-            { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.B4, mult: 2 }, 
-            { note: F.C5, mult: 1 }, { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 },
-            { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
-            { note: F.B4, mult: 1 }, { note: F.E5, mult: 1 }, { note: F.D5, mult: 1 }, { note: F.C5, mult: 1 },
-            { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, 
-            { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 }
+            { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.B4, mult: 2 }
         ];
-
         const BATTLE_NOTES = [
             { note: F.G4, mult: 1 }, { note: F.FSharp4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.E4, mult: 1 }, 
-            { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, 
-            { note: F.E4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.E4, mult: 1 }, 
-            { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }
+            { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.DSharp4, mult: 1 }
         ];
-
         const VICTORY_NOTES = [
-            { note: F.A4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }, { note: F.ASharp4, mult: 1 }, 
-            { note: F.ASharp4, mult: 1 }, { note: F.ASharp4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.ASharp4, mult: 1 }, 
-            { note: F.A4, mult: 2 }
+            { note: F.A4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }, { note: F.ASharp4, mult: 2 }
         ];
 
         function playNoteStep() {
             if (!isPlaying) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
-
             let playlist = MENU_NOTES;
             if (currentTrack === 'battle') playlist = BATTLE_NOTES;
             if (currentTrack === 'victory') playlist = VICTORY_NOTES;
 
             const item = playlist[currentStep % playlist.length];
             const now = audioCtx.currentTime;
-            
             const baseTime = (currentTrack === 'battle') ? (60 / 170 / 2) : (currentTrack === 'victory' ? (60 / 145 / 2) : (60 / 133 / 2));
             const duration = baseTime * item.mult;
 
@@ -473,16 +469,13 @@
 
             osc.type = (currentTrack === 'battle') ? 'sawtooth' : 'square';
             osc.frequency.setValueAtTime(item.note, now);
-
-            gain.gain.setValueAtTime(0.06, now);
+            gain.gain.setValueAtTime(0.05, now);
             gain.gain.exponentialRampToValueAtTime(0.001, now + (duration * 0.95));
 
             osc.connect(gain);
             gain.connect(audioCtx.destination);
-
             osc.start(now);
             osc.stop(now + duration);
-
             currentStep++;
         }
 
@@ -495,22 +488,15 @@
         function toggleMusic() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             const btn = document.getElementById('bgm-toggle');
-
             if (isPlaying) {
                 isPlaying = false;
                 clearInterval(bgmInterval);
-                if (btn) {
-                    btn.innerText = "🎵 MÚSICA: OFF";
-                    btn.className = "px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded border-2 border-amber-300 transition-all active:translate-y-0.5";
-                }
+                if (btn) btn.innerText = "🎵 MÚSICA: OFF";
             } else {
                 isPlaying = true;
                 currentStep = 0;
                 bgmInterval = setInterval(playNoteStep, getIntervalByTrack());
-                if (btn) {
-                    btn.innerText = "⏸️ MÚSICA: ON";
-                    btn.className = "px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black rounded border-2 border-emerald-300 transition-all active:translate-y-0.5";
-                }
+                if (btn) btn.innerText = "⏸️ MÚSICA: ON";
             }
         }
 
@@ -564,18 +550,6 @@
                 osc.stop(now + 0.04);
             }
         }
-
-        const MEWTWO_POKEMON = {
-            id: 150, name: "MEWTWO", type: "psychic", hp: 150, maxHp: 150,
-            spriteBack: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/150.gif",
-            spriteFront: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/150.gif",
-            moves: [
-                { name: "ONDA MENTAL", type: "psychic", power: 65, accuracy: 1.0, pp: 10, maxPp: 10 },
-                { name: "ESFERA AURAL", type: "fighting", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 },
-                { name: "RAYO HIELO", type: "ice", power: 55, accuracy: 1.0, pp: 10, maxPp: 10 },
-                { name: "BOLA SOMBRA", type: "ghost", power: 55, accuracy: 1.0, pp: 15, maxPp: 15 }
-            ]
-        };
 
         const RAW_POKEDEX = [
             { id: 25, name: "PIKACHU", type: "electric", m: ["RAYO", "TRUENO", "ATAQUE RÁPIDO", "COLA FÉRREA"] },
@@ -655,39 +629,95 @@
             { id: 12, name: "BUTTERFREE", type: "bug", m: ["ZUMBIDO", "PSÍQUICO", "TORNADO", "GIGADRENADO"] }
         ];
 
-        const POKEMON_LIST = RAW_POKEDEX.map(p => {
+        function createPokemonObject(raw) {
             return {
-                id: p.id,
-                name: p.name,
-                type: p.type,
+                id: raw.id,
+                name: raw.name,
+                type: raw.type,
                 hp: 150,
                 maxHp: 150,
-                spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/${p.id}.gif`,
-                spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${p.id}.gif`,
-                moves: p.m.map((moveName, i) => ({
+                spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/${raw.id}.gif`,
+                spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${raw.id}.gif`,
+                moves: raw.m.map((moveName, i) => ({
                     name: moveName,
-                    type: p.type,
+                    type: raw.type,
                     power: 45 + (i * 10),
                     accuracy: 0.95 - (i * 0.02),
                     pp: 15 - (i * 2),
                     maxPp: 15 - (i * 2)
                 }))
             };
-        });
+        }
+
+        const POKEMON_LIST = RAW_POKEDEX.map(createPokemonObject);
+        const MEWTWO_POKEMON = createPokemonObject({ id: 150, name: "MEWTWO", type: "psychic", m: ["ONDA MENTAL", "ESFERA AURAL", "RAYO HIELO", "BOLA SOMBRA"] });
 
         let gameState = {
-            player: null,
-            enemy: null,
+            playerTeam: [],
+            enemyTeam: [],
+            playerIndex: 0,
+            enemyIndex: 0,
             isBusy: false
         };
 
-        function renderSelectionMenu() {
-            renderAvatarSelection();
+        function toggleTeamSelection(pokemonId) {
+            playRetroSFX('click');
+            const index = selectedTeamIds.indexOf(pokemonId);
+            if (index > -1) {
+                selectedTeamIds.splice(index, 1);
+            } else {
+                if (selectedTeamIds.length < 6) {
+                    selectedTeamIds.push(pokemonId);
+                }
+            }
+            renderTeamSelection();
+        }
+
+        function renderTeamSelection() {
+            // Actualizar ranuras de equipo seleccionado
+            const teamDisplay = document.getElementById('selected-team-display');
+            teamDisplay.innerHTML = '';
+            for (let i = 0; i < 6; i++) {
+                if (i < selectedTeamIds.length) {
+                    const p = POKEMON_LIST.find(item => item.id === selectedTeamIds[i]);
+                    teamDisplay.innerHTML += `
+                        <div onclick="toggleTeamSelection(${p.id})" class="w-10 h-10 gba-box flex items-center justify-center relative cursor-pointer border-amber-400 bg-slate-800 hover:bg-red-950/60">
+                            <img src="${p.spriteFront}" class="w-8 h-8 pixel-sprite">
+                            <span class="absolute -top-1 -right-1 bg-red-600 text-white text-[6px] rounded-full w-3 h-3 flex items-center justify-center font-bold">x</span>
+                        </div>
+                    `;
+                } else {
+                    teamDisplay.innerHTML += `
+                        <div class="w-10 h-10 gba-box border-dashed border-slate-600 flex items-center justify-center text-slate-600 text-[10px] font-bold">
+                            ${i + 1}
+                        </div>
+                    `;
+                }
+            }
+
+            // Actualizar contador
+            const counter = document.getElementById('team-counter');
+            counter.innerText = `[ ${selectedTeamIds.length} / 6 ]`;
+
+            // Habilitar o deshabilitar botón de combate
+            const startBtn = document.getElementById('btn-start-battle');
+            if (selectedTeamIds.length === 6) {
+                startBtn.disabled = false;
+                startBtn.innerText = "⚔️ ¡COMBATIR (6v6)!";
+                startBtn.className = "w-full max-w-xs py-2.5 bg-emerald-600 hover:bg-emerald-500 border-2 border-emerald-300 text-white font-black text-[10px] rounded shadow-lg active:translate-y-0.5 animate-pulse cursor-pointer";
+            } else {
+                startBtn.disabled = true;
+                startBtn.innerText = `ELIGE ${6 - selectedTeamIds.length} POKÉMON MÁS`;
+                startBtn.className = "w-full max-w-xs py-2 bg-slate-700 text-slate-400 border-2 border-slate-600 font-black text-[10px] rounded shadow-md cursor-not-allowed transition-all mb-3";
+            }
+
+            // Actualizar catálogo indicando cuáles están en el equipo
             const roster = document.getElementById('pokemon-roster');
             roster.innerHTML = '';
-            POKEMON_LIST.forEach((p, idx) => {
+            POKEMON_LIST.forEach((p) => {
+                const isChosen = selectedTeamIds.includes(p.id);
                 roster.innerHTML += `
-                    <button onclick="selectPokemon(${idx})" class="gba-box p-1 flex flex-col items-center hover:bg-slate-700 active:translate-y-0.5 transition-all">
+                    <button onclick="toggleTeamSelection(${p.id})" class="gba-box p-1 flex flex-col items-center transition-all ${isChosen ? 'border-amber-400 bg-slate-700 ring-2 ring-amber-400' : 'hover:bg-slate-700 opacity-80'}">
                         <img src="${p.spriteFront}" alt="${p.name}" class="w-8 h-8 pixel-sprite mb-0.5">
                         <span class="text-[5px] font-bold text-amber-300 truncate w-full text-center">${p.name}</span>
                     </button>
@@ -695,22 +725,44 @@
             });
         }
 
-        async function selectPokemon(index) {
+        function renderSelectionMenu() {
+            renderAvatarSelection();
+            renderTeamSelection();
+        }
+
+        async function startBattle6v6() {
+            if (selectedTeamIds.length !== 6) return;
             playRetroSFX('click');
             setTrackMode('battle');
 
-            const chosen = POKEMON_LIST[index];
-            gameState.player = JSON.parse(JSON.stringify(chosen));
-            
+            // Crear escuadra del jugador
+            gameState.playerTeam = selectedTeamIds.map(id => {
+                const base = POKEMON_LIST.find(p => p.id === id);
+                return JSON.parse(JSON.stringify(base));
+            });
+            gameState.playerIndex = 0;
+
+            // Generar escuadra del rival
+            gameState.enemyTeam = [];
             if (currentDifficulty === 'boss') {
-                gameState.enemy = JSON.parse(JSON.stringify(MEWTWO_POKEMON));
+                gameState.enemyTeam.push(JSON.parse(JSON.stringify(MEWTWO_POKEMON)));
+                while (gameState.enemyTeam.length < 6) {
+                    const r = Math.floor(Math.random() * POKEMON_LIST.length);
+                    const chosen = POKEMON_LIST[r];
+                    if (!gameState.enemyTeam.some(p => p.id === chosen.id)) {
+                        gameState.enemyTeam.push(JSON.parse(JSON.stringify(chosen)));
+                    }
+                }
             } else {
-                let enemyIndex;
-                do {
-                    enemyIndex = Math.floor(Math.random() * POKEMON_LIST.length);
-                } while (POKEMON_LIST.length > 1 && POKEMON_LIST[enemyIndex].name === chosen.name);
-                gameState.enemy = JSON.parse(JSON.stringify(POKEMON_LIST[enemyIndex]));
+                while (gameState.enemyTeam.length < 6) {
+                    const r = Math.floor(Math.random() * POKEMON_LIST.length);
+                    const chosen = POKEMON_LIST[r];
+                    if (!gameState.enemyTeam.some(p => p.id === chosen.id)) {
+                        gameState.enemyTeam.push(JSON.parse(JSON.stringify(chosen)));
+                    }
+                }
             }
+            gameState.enemyIndex = 0;
 
             const trainerData = TRAINERS[currentDifficulty];
             document.getElementById('vs-rival-name').innerText = trainerData.name;
@@ -722,14 +774,17 @@
             document.getElementById('selection-screen').classList.add('hidden');
             document.getElementById('battle-screen').classList.remove('hidden');
             document.getElementById('empty-menu').classList.add('hidden');
-            
-            document.getElementById('player-sprite').src = gameState.player.spriteBack;
-            document.getElementById('enemy-sprite').src = gameState.enemy.spriteFront;
-            
-            document.getElementById('player-name').innerText = gameState.player.name;
-            document.getElementById('enemy-name').innerText = gameState.enemy.name;
 
-            gameState.player.potions = 3;
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+            
+            document.getElementById('player-sprite').src = pCurr.spriteBack;
+            document.getElementById('enemy-sprite').src = eCurr.spriteFront;
+            
+            document.getElementById('player-name').innerText = pCurr.name;
+            document.getElementById('enemy-name').innerText = eCurr.name;
+
+            gameState.playerTeam.forEach(p => p.potions = 3);
             updateUI();
 
             gameState.isBusy = true;
@@ -743,7 +798,7 @@
             bottomPanel.classList.add('anim-vs-right');
             vsLogo.classList.add('anim-vs-logo');
 
-            await typeWriter(`¡${trainerData.name} te desafía a un combate!`);
+            await typeWriter(`¡${trainerData.name} te desafía a una batalla 6v6!`);
             playRetroSFX('super-effective');
             await new Promise(r => setTimeout(r, 1600));
 
@@ -757,7 +812,7 @@
             await new Promise(r => setTimeout(r, 350));
             ballEnemy.classList.remove('anim-pokeball');
 
-            await typeWriter(`¡El rival envió a ${gameState.enemy.name}!`);
+            await typeWriter(`¡El rival envió a ${eCurr.name}!`);
             document.getElementById('enemy-sprite-box').style.opacity = '1';
             document.getElementById('enemy-card').style.opacity = '1';
             playRetroSFX('hit');
@@ -768,22 +823,27 @@
             await new Promise(r => setTimeout(r, 350));
             ballPlayer.classList.remove('anim-pokeball');
 
-            await typeWriter(`¡Adelante, ${gameState.player.name}!`);
+            await typeWriter(`¡Adelante, ${pCurr.name}!`);
             document.getElementById('player-sprite-box').style.opacity = '1';
             document.getElementById('player-card').style.opacity = '1';
             playRetroSFX('heal');
             await new Promise(r => setTimeout(r, 700));
 
-            gameState.player.moves.forEach((m, idx) => {
-                document.getElementById(`move-name-${idx}`).innerText = m.name;
-                document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
-            });
+            refreshMoveButtons();
 
             document.getElementById('main-menu').classList.remove('hidden');
             document.getElementById('main-menu').classList.add('grid');
 
-            await typeWriter(`¿Qué debería hacer ${gameState.player.name}?`);
+            await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
             gameState.isBusy = false;
+        }
+
+        function refreshMoveButtons() {
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            pCurr.moves.forEach((m, idx) => {
+                document.getElementById(`move-name-${idx}`).innerText = m.name;
+                document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
+            });
         }
 
         function returnToSelection() {
@@ -800,9 +860,12 @@
             document.getElementById('battle-screen').classList.add('hidden');
             document.getElementById('main-menu').classList.remove('grid');
             document.getElementById('main-menu').classList.add('hidden');
+            document.getElementById('moves-menu').classList.add('hidden');
+            document.getElementById('switch-menu').classList.add('hidden');
+            document.getElementById('bag-menu').classList.add('hidden');
             document.getElementById('empty-menu').classList.remove('hidden');
             document.getElementById('selection-screen').classList.remove('hidden');
-            typeWriter("¡Elige tu avatar, dificultad y tu Pokémon!");
+            typeWriter("¡Selecciona 6 Pokémon para combatir!");
         }
 
         function typeWriter(text) {
@@ -824,9 +887,70 @@
         function openMoveMenu() {
             if (gameState.isBusy) return;
             playRetroSFX('click');
+            refreshMoveButtons();
             document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('moves-menu').classList.remove('hidden');
             document.getElementById('moves-menu').classList.add('grid');
+        }
+
+        function openSwitchMenu() {
+            if (gameState.isBusy) return;
+            playRetroSFX('click');
+            const menu = document.getElementById('switch-menu');
+            menu.innerHTML = '';
+            
+            gameState.playerTeam.forEach((p, idx) => {
+                const isCurrent = (idx === gameState.playerIndex);
+                const isFainted = (p.hp <= 0);
+                menu.innerHTML += `
+                    <button onclick="switchPlayerPokemon(${idx})" ${isCurrent || isFainted ? 'disabled' : ''} class="p-1.5 gba-box flex flex-col items-center ${isCurrent ? 'border-amber-400 bg-slate-700' : isFainted ? 'opacity-40 bg-red-950' : 'hover:bg-slate-700'}">
+                        <img src="${p.spriteFront}" class="w-8 h-8 pixel-sprite">
+                        <span class="text-[6px] font-bold text-slate-200 mt-0.5">${p.name}</span>
+                        <span class="text-[5px] font-bold ${isFainted ? 'text-red-500' : 'text-emerald-400'}">${isFainted ? 'DEBILITADO' : `${p.hp}/150`}</span>
+                    </button>
+                `;
+            });
+            menu.innerHTML += `
+                <button onclick="backToMain()" class="col-span-3 py-1 bg-slate-800 border-2 border-slate-600 text-red-400 text-[8px] font-bold rounded">
+                    ↩️ CANCELAR
+                </button>
+            `;
+
+            document.getElementById('main-menu').classList.add('hidden');
+            menu.classList.remove('hidden');
+            menu.classList.add('grid');
+        }
+
+        async function switchPlayerPokemon(targetIdx) {
+            if (targetIdx === gameState.playerIndex) return;
+            gameState.isBusy = true;
+            playRetroSFX('click');
+
+            document.getElementById('switch-menu').classList.add('hidden');
+            document.getElementById('player-sprite-box').style.opacity = '0';
+            
+            await typeWriter(`¡Vuelve, ${gameState.playerTeam[gameState.playerIndex].name}!`);
+            await new Promise(r => setTimeout(r, 500));
+
+            gameState.playerIndex = targetIdx;
+            const newPkmn = gameState.playerTeam[gameState.playerIndex];
+
+            document.getElementById('player-sprite').src = newPkmn.spriteBack;
+            document.getElementById('player-name').innerText = newPkmn.name;
+            updateUI();
+
+            const ballPlayer = document.getElementById('throw-pokeball-player');
+            ballPlayer.classList.add('anim-pokeball');
+            await new Promise(r => setTimeout(r, 350));
+            ballPlayer.classList.remove('anim-pokeball');
+
+            document.getElementById('player-sprite-box').style.opacity = '1';
+            await typeWriter(`¡Adelante, ${newPkmn.name}!`);
+            playRetroSFX('heal');
+            await new Promise(r => setTimeout(r, 600));
+
+            // El enemigo ataca por haber gastado el turno cambiando
+            await handleEnemyTurn();
         }
 
         function openBagMenu() {
@@ -840,6 +964,7 @@
         function backToMain() {
             playRetroSFX('click');
             document.getElementById('moves-menu').classList.add('hidden');
+            document.getElementById('switch-menu').classList.add('hidden');
             document.getElementById('bag-menu').classList.add('hidden');
             document.getElementById('main-menu').classList.remove('hidden');
         }
@@ -854,27 +979,37 @@
             }
         }
 
-        function updateUI() {
-            if (!gameState.player || !gameState.enemy) return;
+        function updateTeamDots(containerId, team) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            team.forEach(p => {
+                const color = (p.hp > 0) ? 'bg-emerald-400' : 'bg-slate-600';
+                container.innerHTML += `<span class="w-1.5 h-1.5 rounded-full ${color}"></span>`;
+            });
+        }
 
-            const pPct = Math.max(0, (gameState.player.hp / 150) * 100);
+        function updateUI() {
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+
+            if (!pCurr || !eCurr) return;
+
+            const pPct = Math.max(0, (pCurr.hp / 150) * 100);
             const playerBar = document.getElementById('player-hp-bar');
             playerBar.style.width = pPct + '%';
             updateHPBarColor(playerBar, pPct);
-            document.getElementById('player-hp-text').innerText = `${gameState.player.hp}/150`;
+            document.getElementById('player-hp-text').innerText = `${pCurr.hp}/150`;
             
-            const ePct = Math.max(0, (gameState.enemy.hp / 150) * 100);
+            const ePct = Math.max(0, (eCurr.hp / 150) * 100);
             const enemyBar = document.getElementById('enemy-hp-bar');
             enemyBar.style.width = ePct + '%';
             updateHPBarColor(enemyBar, ePct);
-            document.getElementById('enemy-hp-text').innerText = `${gameState.enemy.hp}/150`;
+            document.getElementById('enemy-hp-text').innerText = `${eCurr.hp}/150`;
 
-            document.getElementById('potion-count').innerText = gameState.player.potions;
+            document.getElementById('potion-count').innerText = pCurr.potions;
 
-            gameState.player.moves.forEach((m, idx) => {
-                document.getElementById(`move-name-${idx}`).innerText = m.name;
-                document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
-            });
+            updateTeamDots('player-team-dots', gameState.playerTeam);
+            updateTeamDots('enemy-team-dots', gameState.enemyTeam);
         }
 
         function popDamageText(target, text) {
@@ -886,14 +1021,15 @@
         }
 
         function chooseEnemyMove() {
-            const moves = gameState.enemy.moves;
-            const targetType = gameState.player.type;
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            const moves = eCurr.moves;
 
             if (currentDifficulty === 'easy') {
                 return moves[Math.floor(Math.random() * moves.length)];
             } 
             else if (currentDifficulty === 'medium') {
-                const superMoves = moves.filter(m => getEffectiveness(m.type, targetType) > 1.0);
+                const superMoves = moves.filter(m => getEffectiveness(m.type, pCurr.type) > 1.0);
                 if (superMoves.length > 0 && Math.random() < 0.7) {
                     return superMoves[Math.floor(Math.random() * superMoves.length)];
                 }
@@ -902,9 +1038,8 @@
             else {
                 let bestMove = moves[0];
                 let maxScore = -1;
-
                 moves.forEach(m => {
-                    const eff = getEffectiveness(m.type, targetType);
+                    const eff = getEffectiveness(m.type, pCurr.type);
                     if (eff === 0.0) return;
                     const score = m.power * eff;
                     if (score > maxScore) {
@@ -918,7 +1053,8 @@
 
         async function useMove(index) {
             if (gameState.isBusy) return;
-            const move = gameState.player.moves[index];
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            const move = pCurr.moves[index];
 
             if (move.pp <= 0) {
                 await typeWriter("¡No quedan PP para este movimiento!");
@@ -929,56 +1065,84 @@
             move.pp--;
             backToMain();
 
-            await typeWriter(`¡${gameState.player.name} usó ${move.name}!`);
+            await typeWriter(`¡${pCurr.name} usó ${move.name}!`);
 
             const playerSprite = document.getElementById('player-sprite');
             playerSprite.classList.add('anim-attack-player');
             await new Promise(r => setTimeout(r, 250));
             playerSprite.classList.remove('anim-attack-player');
 
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+
             if (Math.random() <= move.accuracy) {
-                const mult = getEffectiveness(move.type, gameState.enemy.type);
+                const mult = getEffectiveness(move.type, eCurr.type);
                 const rawDmg = move.power + Math.floor(Math.random() * 8);
                 const finalDmg = Math.floor(rawDmg * mult);
 
                 if (mult === 0) {
-                    await typeWriter(`¡No afecta a ${gameState.enemy.name}! 🚫`);
+                    await typeWriter(`¡No afecta a ${eCurr.name}! 🚫`);
                 } else {
-                    gameState.enemy.hp = Math.max(0, gameState.enemy.hp - finalDmg);
-                    
+                    eCurr.hp = Math.max(0, eCurr.hp - finalDmg);
                     if (mult > 1.0) playRetroSFX('super-effective');
                     else playRetroSFX('hit');
 
                     popDamageText('enemy', `-${finalDmg}`);
-
                     const enemySprite = document.getElementById('enemy-sprite');
                     enemySprite.classList.add('anim-damage');
                     updateUI();
                     await new Promise(r => setTimeout(r, 400));
                     enemySprite.classList.remove('anim-damage');
 
-                    if (mult > 1.0) {
-                        await typeWriter("¡Es súper eficaz! 💥");
-                    } else if (mult < 1.0) {
-                        await typeWriter("No es muy eficaz... 🛡️");
-                    }
+                    if (mult > 1.0) await typeWriter("¡Es súper eficaz! 💥");
+                    else if (mult < 1.0) await typeWriter("No es muy eficaz... 🛡️");
                 }
 
-                if (gameState.enemy.hp <= 0) {
+                if (eCurr.hp <= 0) {
                     await new Promise(r => setTimeout(r, 400));
-                    setTrackMode('victory');
-                    await typeWriter(`¡El ${gameState.enemy.name} enemigo se debilitó! ¡Ganaste! 🏆`);
+                    await typeWriter(`¡El ${eCurr.name} enemigo se debilitó!`);
                     document.getElementById('enemy-sprite-box').style.opacity = '0';
-                    return;
+
+                    // Comprobar si al rival le quedan Pokémon
+                    const nextEnemyIdx = gameState.enemyTeam.findIndex(p => p.hp > 0);
+                    if (nextEnemyIdx === -1) {
+                        setTrackMode('victory');
+                        await typeWriter("¡Has derrotado a todos los Pokémon del rival! ¡VICTORIA! 🏆");
+                        return;
+                    } else {
+                        gameState.enemyIndex = nextEnemyIdx;
+                        const newEnemy = gameState.enemyTeam[gameState.enemyIndex];
+                        await typeWriter(`¡El rival envió a ${newEnemy.name}!`);
+                        document.getElementById('enemy-sprite').src = newEnemy.spriteFront;
+                        document.getElementById('enemy-name').innerText = newEnemy.name;
+                        updateUI();
+
+                        const ballEnemy = document.getElementById('throw-pokeball-enemy');
+                        ballEnemy.classList.add('anim-pokeball');
+                        await new Promise(r => setTimeout(r, 350));
+                        ballEnemy.classList.remove('anim-pokeball');
+
+                        document.getElementById('enemy-sprite-box').style.opacity = '1';
+                        playRetroSFX('hit');
+                        await new Promise(r => setTimeout(r, 600));
+                        await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
+                        gameState.isBusy = false;
+                        return;
+                    }
                 }
             } else {
-                await typeWriter(`¡El ataque de ${gameState.player.name} falló!`);
+                await typeWriter(`¡El ataque de ${pCurr.name} falló!`);
             }
 
             await new Promise(r => setTimeout(r, 800));
+            await handleEnemyTurn();
+        }
+
+        async function handleEnemyTurn() {
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
 
             const enemyMove = chooseEnemyMove();
-            await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
+            await typeWriter(`¡El ${eCurr.name} enemigo usó ${enemyMove.name}!`);
 
             const enemySprite = document.getElementById('enemy-sprite');
             enemySprite.classList.add('anim-attack-enemy');
@@ -986,78 +1150,74 @@
             enemySprite.classList.remove('anim-attack-enemy');
 
             if (Math.random() <= enemyMove.accuracy) {
-                const eMult = getEffectiveness(enemyMove.type, gameState.player.type);
+                const eMult = getEffectiveness(enemyMove.type, pCurr.type);
                 const eRawDmg = enemyMove.power + Math.floor(Math.random() * 6);
                 const enemyDmg = Math.floor(eRawDmg * eMult);
 
                 if (eMult === 0) {
-                    await typeWriter(`¡No afecta a ${gameState.player.name}! 🚫`);
+                    await typeWriter(`¡No afecta a ${pCurr.name}! 🚫`);
                 } else {
-                    gameState.player.hp = Math.max(0, gameState.player.hp - enemyDmg);
-                    
+                    pCurr.hp = Math.max(0, pCurr.hp - enemyDmg);
                     if (eMult > 1.0) playRetroSFX('super-effective');
                     else playRetroSFX('hit');
 
                     popDamageText('player', `-${enemyDmg}`);
-
+                    const playerSprite = document.getElementById('player-sprite');
                     playerSprite.classList.add('anim-damage');
                     updateUI();
                     await new Promise(r => setTimeout(r, 400));
                     playerSprite.classList.remove('anim-damage');
 
-                    if (eMult > 1.0) {
-                        await typeWriter("¡Es súper eficaz contra ti! 💥");
-                    } else if (eMult < 1.0) {
-                        await typeWriter("No fue muy eficaz... 🛡️");
-                    }
+                    if (eMult > 1.0) await typeWriter("¡Es súper eficaz contra ti! 💥");
+                    else if (eMult < 1.0) await typeWriter("No fue muy eficaz... 🛡️");
                 }
 
-                if (gameState.player.hp <= 0) {
+                if (pCurr.hp <= 0) {
                     await new Promise(r => setTimeout(r, 400));
-                    setTrackMode('victory');
-                    await typeWriter(`¡${gameState.player.name} se debilitó! Has perdido el combate... 💀`);
+                    await typeWriter(`¡${pCurr.name} se debilitó!`);
                     document.getElementById('player-sprite-box').style.opacity = '0';
-                    return;
+
+                    // Comprobar si al jugador le quedan Pokémon vivos
+                    const hasAlive = gameState.playerTeam.some(p => p.hp > 0);
+                    if (!hasAlive) {
+                        setTrackMode('victory');
+                        await typeWriter("¡Todos tus Pokémon se debilitaron! Has perdido el combate... 💀");
+                        return;
+                    } else {
+                        await typeWriter("Elige a tu siguiente Pokémon para enviar al combate.");
+                        openSwitchMenu();
+                        gameState.isBusy = false;
+                        return;
+                    }
                 }
             } else {
-                await typeWriter(`¡El ataque de ${gameState.enemy.name} falló!`);
+                await typeWriter(`¡El ataque de ${eCurr.name} falló!`);
             }
 
             await new Promise(r => setTimeout(r, 600));
-            await typeWriter(`¿Qué debería hacer ${gameState.player.name}?`);
+            await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
             gameState.isBusy = false;
         }
 
         async function usePotionItem() {
             if (gameState.isBusy) return;
-            if (gameState.player.potions <= 0) {
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            if (pCurr.potions <= 0) {
                 await typeWriter("¡No quedan Hiperpociones!");
                 return;
             }
 
             gameState.isBusy = true;
-            gameState.player.potions--;
-            gameState.player.hp = Math.min(150, gameState.player.hp + 60);
+            pCurr.potions--;
+            pCurr.hp = Math.min(150, pCurr.hp + 60);
 
             backToMain();
             playRetroSFX('heal');
             updateUI();
-            await typeWriter(`¡Usaste HIPERPOCIÓN! Restauraste PS a ${gameState.player.name}.`);
+            await typeWriter(`¡Usaste HIPERPOCIÓN! Restauraste PS a ${pCurr.name}.`);
 
             await new Promise(r => setTimeout(r, 1000));
-
-            const enemyMove = chooseEnemyMove();
-            await typeWriter(`¡El ${gameState.enemy.name} enemigo usó ${enemyMove.name}!`);
-
-            const enemyDmg = enemyMove.power + Math.floor(Math.random() * 6);
-            gameState.player.hp = Math.max(0, gameState.player.hp - enemyDmg);
-            playRetroSFX('hit');
-            popDamageText('player', `-${enemyDmg}`);
-
-            updateUI();
-            await new Promise(r => setTimeout(r, 800));
-            await typeWriter(`¿Qué debería hacer ${gameState.player.name}?`);
-            gameState.isBusy = false;
+            await handleEnemyTurn();
         }
 
         async function handleRun() {
