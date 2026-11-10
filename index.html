@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - 6v6 Team Edition</title>
+    <title>Pokémon Battle Simulator - Fixed Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -260,21 +260,17 @@
                     <span class="text-[8px] text-amber-300 font-bold">3. TU EQUIPO:</span>
                     <span id="team-counter" class="text-[8px] font-bold text-sky-400">[ 0 / 6 ]</span>
                 </div>
-                <div id="selected-team-display" class="flex gap-1.5 justify-center min-h-[40px] items-center">
-                    <!-- Se renderizan las 6 ranuras -->
-                </div>
+                <div id="selected-team-display" class="flex gap-1.5 justify-center min-h-[40px] items-center"></div>
             </div>
 
-            <!-- BOTÓN DE INICIAR COMBATE (DESACTIVADO HASTA TENER 6) -->
+            <!-- BOTÓN DE INICIAR COMBATE -->
             <button id="btn-start-battle" onclick="startBattle6v6()" disabled class="w-full max-w-xs py-2 bg-slate-700 text-slate-400 border-2 border-slate-600 font-black text-[10px] rounded shadow-md cursor-not-allowed transition-all mb-3">
                 ⚔️ SELECCIONA 6 POKÉMON
             </button>
 
             <!-- SELECTOR DE POKÉMON DISPONIBLES -->
             <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">CATÁLOGO POKÉDEX</h2>
-            <div id="pokemon-roster" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-lg mb-4">
-                <!-- Se llena por JavaScript -->
-            </div>
+            <div id="pokemon-roster" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-lg mb-4"></div>
         </div>
 
         <!-- SECCIÓN INFERIOR: DIÁLOGOS Y MENÚS -->
@@ -324,9 +320,7 @@
             </div>
 
             <!-- SUB-MENÚ CAMBIAR POKÉMON EN BATALLA -->
-            <div id="switch-menu" class="hidden grid-cols-3 gap-1.5 mt-2">
-                <!-- Se llena dinámicamente con los 6 Pokémon del jugador -->
-            </div>
+            <div id="switch-menu" class="hidden grid-cols-3 gap-1.5 mt-2"></div>
 
             <!-- SUB-MENÚ MOCHILA -->
             <div id="bag-menu" class="hidden flex-col gap-2 mt-2">
@@ -674,7 +668,6 @@
         }
 
         function renderTeamSelection() {
-            // Actualizar ranuras de equipo seleccionado
             const teamDisplay = document.getElementById('selected-team-display');
             teamDisplay.innerHTML = '';
             for (let i = 0; i < 6; i++) {
@@ -695,11 +688,8 @@
                 }
             }
 
-            // Actualizar contador
-            const counter = document.getElementById('team-counter');
-            counter.innerText = `[ ${selectedTeamIds.length} / 6 ]`;
+            document.getElementById('team-counter').innerText = `[ ${selectedTeamIds.length} / 6 ]`;
 
-            // Habilitar o deshabilitar botón de combate
             const startBtn = document.getElementById('btn-start-battle');
             if (selectedTeamIds.length === 6) {
                 startBtn.disabled = false;
@@ -711,7 +701,6 @@
                 startBtn.className = "w-full max-w-xs py-2 bg-slate-700 text-slate-400 border-2 border-slate-600 font-black text-[10px] rounded shadow-md cursor-not-allowed transition-all mb-3";
             }
 
-            // Actualizar catálogo indicando cuáles están en el equipo
             const roster = document.getElementById('pokemon-roster');
             roster.innerHTML = '';
             POKEMON_LIST.forEach((p) => {
@@ -735,14 +724,12 @@
             playRetroSFX('click');
             setTrackMode('battle');
 
-            // Crear escuadra del jugador
             gameState.playerTeam = selectedTeamIds.map(id => {
                 const base = POKEMON_LIST.find(p => p.id === id);
                 return JSON.parse(JSON.stringify(base));
             });
             gameState.playerIndex = 0;
 
-            // Generar escuadra del rival
             gameState.enemyTeam = [];
             if (currentDifficulty === 'boss') {
                 gameState.enemyTeam.push(JSON.parse(JSON.stringify(MEWTWO_POKEMON)));
@@ -888,6 +875,7 @@
             if (gameState.isBusy) return;
             playRetroSFX('click');
             refreshMoveButtons();
+            document.getElementById('main-menu').classList.remove('hidden'); // Asegurar visibilidad general
             document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('moves-menu').classList.remove('hidden');
             document.getElementById('moves-menu').classList.add('grid');
@@ -930,7 +918,7 @@
             document.getElementById('player-sprite-box').style.opacity = '0';
             
             await typeWriter(`¡Vuelve, ${gameState.playerTeam[gameState.playerIndex].name}!`);
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 400));
 
             gameState.playerIndex = targetIdx;
             const newPkmn = gameState.playerTeam[gameState.playerIndex];
@@ -949,8 +937,10 @@
             playRetroSFX('heal');
             await new Promise(r => setTimeout(r, 600));
 
-            // El enemigo ataca por haber gastado el turno cambiando
-            await handleEnemyTurn();
+            // CORRECCIÓN: Al cambiar de Pokémon de forma táctica, ahora se regresa al menú principal limpio en lugar de activar un ataque libre al rival
+            backToMain();
+            await typeWriter(`¿Qué debería hacer ${newPkmn.name}?`);
+            gameState.isBusy = false;
         }
 
         function openBagMenu() {
@@ -966,7 +956,10 @@
             document.getElementById('moves-menu').classList.add('hidden');
             document.getElementById('switch-menu').classList.add('hidden');
             document.getElementById('bag-menu').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('hidden');
+            // CORRECCIÓN: Forzar siempre a mostrar el menú principal con grid correctamente
+            const mainMenu = document.getElementById('main-menu');
+            mainMenu.classList.remove('hidden');
+            mainMenu.classList.add('grid');
         }
 
         function updateHPBarColor(barElement, percentage) {
@@ -1102,7 +1095,6 @@
                     await typeWriter(`¡El ${eCurr.name} enemigo se debilitó!`);
                     document.getElementById('enemy-sprite-box').style.opacity = '0';
 
-                    // Comprobar si al rival le quedan Pokémon
                     const nextEnemyIdx = gameState.enemyTeam.findIndex(p => p.hp > 0);
                     if (nextEnemyIdx === -1) {
                         setTrackMode('victory');
@@ -1124,6 +1116,7 @@
                         document.getElementById('enemy-sprite-box').style.opacity = '1';
                         playRetroSFX('hit');
                         await new Promise(r => setTimeout(r, 600));
+                        backToMain();
                         await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
                         gameState.isBusy = false;
                         return;
@@ -1177,7 +1170,6 @@
                     await typeWriter(`¡${pCurr.name} se debilitó!`);
                     document.getElementById('player-sprite-box').style.opacity = '0';
 
-                    // Comprobar si al jugador le quedan Pokémon vivos
                     const hasAlive = gameState.playerTeam.some(p => p.hp > 0);
                     if (!hasAlive) {
                         setTrackMode('victory');
@@ -1195,6 +1187,7 @@
             }
 
             await new Promise(r => setTimeout(r, 600));
+            backToMain();
             await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
             gameState.isBusy = false;
         }
