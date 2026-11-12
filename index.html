@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokémon Battle Simulator - Fixed Edition</title>
+    <title>Pokémon Battle Simulator - Status Effects Edition</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
     <style>
@@ -21,9 +21,7 @@
             overflow: hidden;
         }
 
-        .vt323 {
-            font-family: 'VT323', monospace;
-        }
+        .vt323 { font-family: 'VT323', monospace; }
 
         .gba-box {
             background: #282c3c;
@@ -49,10 +47,7 @@
             border-radius: 4px;
         }
 
-        .scanlines {
-            position: relative;
-            overflow: hidden;
-        }
+        .scanlines { position: relative; overflow: hidden; }
         .scanlines::before {
             content: " ";
             display: block;
@@ -71,15 +66,8 @@
             border-radius: 2px;
         }
 
-        .hp-bar-fill {
-            transition: width 0.4s steps(10, end), background-color 0.4s ease;
-        }
-
-        .pixel-sprite {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            -ms-interpolation-mode: nearest-neighbor;
-        }
+        .hp-bar-fill { transition: width 0.4s steps(10, end), background-color 0.4s ease; }
+        .pixel-sprite { image-rendering: pixelated; }
 
         @keyframes pixel-float {
             0%, 100% { transform: translateY(0); }
@@ -140,30 +128,30 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-2 sm:p-4">
 
-    <!-- CONTENEDOR PRINCIPAL GBA STYLE -->
     <div class="w-full max-w-2xl gba-box-outer rounded-xl overflow-hidden relative shadow-2xl">
         
-        <!-- BARRA SUPERIOR DE AUDIO Y CONTROL -->
         <div class="bg-slate-900 border-b-4 border-slate-800 px-3 py-2 flex items-center justify-between text-[10px]">
             <div class="flex items-center space-x-2">
                 <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="text-amber-400 font-bold tracking-wider">POKÉMON BATTLE SIMULATOR (6v6)</span>
+                <span class="text-amber-400 font-bold tracking-wider">POKÉMON BATTLE SIMULATOR (ESTADOS)</span>
             </div>
             <button id="bgm-toggle" onclick="toggleMusic()" class="px-2.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded border-2 border-amber-300 transition-all active:translate-y-0.5">
                 🎵 MÚSICA: OFF
             </button>
         </div>
 
-        <!-- PANTALLA PRINCIPAL / ARENA DE BATALLA -->
         <div id="battle-screen" class="hidden relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-indigo-950 via-sky-900 to-emerald-900 overflow-hidden p-4">
             
             <div class="absolute top-24 right-6 w-48 h-10 bg-emerald-700/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
             <div class="absolute bottom-6 left-6 w-56 h-12 bg-emerald-600/80 rounded-full border-b-4 border-emerald-950 shadow-inner"></div>
 
             <!-- CARD ESTADO RIVAL -->
-            <div id="enemy-card" class="absolute top-3 left-4 w-52 sm:w-64 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
+            <div id="enemy-card" class="absolute top-3 left-4 w-56 sm:w-68 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
-                    <span id="enemy-name">CHARIZARD</span>
+                    <div class="flex items-center gap-1">
+                        <span id="enemy-name">CHARIZARD</span>
+                        <span id="enemy-status-badge" class="hidden px-1 py-0.5 text-[7px] font-black rounded text-white"></span>
+                    </div>
                     <div id="enemy-team-dots" class="flex gap-0.5"></div>
                 </div>
                 <div class="flex items-center space-x-1">
@@ -177,26 +165,26 @@
                 </div>
             </div>
 
-            <!-- SPRITE RIVAL POKÉMON -->
             <div id="enemy-sprite-box" class="absolute top-4 right-8 z-10 animate-pixel-float flex flex-col items-center opacity-0 transition-opacity duration-500">
                 <img id="enemy-sprite" src="" alt="Enemy" class="w-36 h-36 sm:w-44 sm:h-44 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
             <div id="enemy-damage-pop" class="absolute top-16 right-20 text-yellow-300 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
-            <!-- SPRITE JUGADOR POKÉMON -->
             <div id="player-sprite-box" class="absolute bottom-0 left-8 z-10 animate-pixel-float flex flex-col items-center opacity-0 transition-opacity duration-500">
                 <img id="player-sprite" src="" alt="Player Back" class="w-36 h-36 sm:w-44 sm:h-44 object-contain pixel-sprite drop-shadow-[0_8px_0_rgba(0,0,0,0.4)]">
             </div>
             <div id="player-damage-pop" class="absolute bottom-20 left-20 text-red-400 font-black text-xl z-30 opacity-0 pointer-events-none"></div>
 
-            <!-- EFECTO DE LANZAMIENTO DE POKÉBALL -->
             <div id="throw-pokeball-enemy" class="absolute top-20 right-36 z-20 opacity-0 text-3xl">🔴</div>
             <div id="throw-pokeball-player" class="absolute bottom-20 left-36 z-20 opacity-0 text-3xl">🔴</div>
 
             <!-- CARD ESTADO JUGADOR -->
             <div id="player-card" class="absolute bottom-4 right-4 w-56 sm:w-68 gba-status-card p-2 z-10 opacity-0 transition-opacity duration-300">
                 <div class="flex justify-between items-center text-[10px] font-bold mb-1">
-                    <span id="player-name">PIKACHU</span>
+                    <div class="flex items-center gap-1">
+                        <span id="player-name">PIKACHU</span>
+                        <span id="player-status-badge" class="hidden px-1 py-0.5 text-[7px] font-black rounded text-white"></span>
+                    </div>
                     <div id="player-team-dots" class="flex gap-0.5"></div>
                 </div>
                 <div class="flex items-center space-x-1 mb-1">
@@ -211,7 +199,6 @@
                 </div>
             </div>
 
-            <!-- OVERLAY DE PANTALLA VS -->
             <div id="vs-intro-overlay" class="absolute inset-0 z-30 pointer-events-none hidden overflow-hidden flex items-center justify-center">
                 <div id="vs-panel-top" class="absolute top-0 left-0 w-full h-1/2 bg-red-600 border-b-4 border-amber-300 flex items-center justify-end pr-8 transform -translate-x-full">
                     <div class="flex items-center space-x-4">
@@ -238,14 +225,10 @@
 
         </div>
 
-        <!-- PANTALLA DE SELECCIÓN DE AVATAR, DIFICULTAD Y EQUIPO DE 6 -->
         <div id="selection-screen" class="relative w-full h-72 sm:h-80 scanlines bg-gradient-to-b from-slate-900 via-slate-800 to-slate-950 p-3 flex flex-col justify-start items-center overflow-y-auto">
-            
-            <!-- SELECTOR DE AVATAR -->
             <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">1. ELIGE TU AVATAR</h2>
             <div id="avatar-roster" class="flex gap-2 mb-2"></div>
 
-            <!-- SELECTOR DE DIFICULTAD -->
             <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">2. DIFICULTAD RIVAL</h2>
             <div class="flex flex-wrap justify-center gap-1.5 mb-2">
                 <button onclick="setDifficulty('easy')" id="btn-diff-easy" class="px-2 py-1 bg-emerald-600 border-2 border-emerald-300 text-white text-[7px] font-bold rounded shadow">😊 FÁCIL</button>
@@ -254,7 +237,6 @@
                 <button onclick="setDifficulty('boss')" id="btn-diff-boss" class="px-2 py-1 bg-purple-700 border-2 border-purple-300 text-yellow-300 text-[7px] font-bold rounded shadow opacity-60 animate-pulse">🔮 IMPOSIBLE (Mewtwo)</button>
             </div>
 
-            <!-- PANEL DEL EQUIPO SELECCIONADO (6 SLOTS) -->
             <div class="w-full max-w-lg gba-box p-2 mb-2 bg-slate-950/80">
                 <div class="flex justify-between items-center mb-1">
                     <span class="text-[8px] text-amber-300 font-bold">3. TU EQUIPO:</span>
@@ -263,24 +245,19 @@
                 <div id="selected-team-display" class="flex gap-1.5 justify-center min-h-[40px] items-center"></div>
             </div>
 
-            <!-- BOTÓN DE INICIAR COMBATE -->
             <button id="btn-start-battle" onclick="startBattle6v6()" disabled class="w-full max-w-xs py-2 bg-slate-700 text-slate-400 border-2 border-slate-600 font-black text-[10px] rounded shadow-md cursor-not-allowed transition-all mb-3">
                 ⚔️ SELECCIONA 6 POKÉMON
             </button>
 
-            <!-- SELECTOR DE POKÉMON DISPONIBLES -->
             <h2 class="text-[8px] text-amber-400 font-bold mb-1 tracking-widest text-center">CATÁLOGO POKÉDEX</h2>
             <div id="pokemon-roster" class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 w-full max-w-lg mb-4"></div>
         </div>
 
-        <!-- SECCIÓN INFERIOR: DIÁLOGOS Y MENÚS -->
         <div class="bg-slate-900 border-t-4 border-slate-700 p-2 sm:p-3 min-h-[150px] flex flex-col justify-between">
-            
             <div id="dialog-box" class="gba-box p-3 text-[10px] sm:text-xs text-slate-100 min-h-[56px] flex items-center leading-relaxed tracking-wider vt323 text-lg">
                 <span id="typewriter-text">¡Debes seleccionar 6 Pokémon para armar tu equipo de combate!</span>
             </div>
 
-            <!-- MENÚ PRINCIPAL DE BATALLA -->
             <div id="main-menu" class="hidden grid-cols-2 gap-2 mt-2">
                 <button onclick="openMoveMenu()" class="py-2.5 bg-red-600 hover:bg-red-500 border-2 border-red-300 text-white font-bold text-[10px] rounded shadow-md active:translate-y-0.5">
                     ⚔️ LUCHAR
@@ -296,37 +273,46 @@
                 </button>
             </div>
 
-            <!-- SUB-MENÚ DE MOVIMIENTOS -->
             <div id="moves-menu" class="hidden grid-cols-2 gap-2 mt-2">
                 <button onclick="useMove(0)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
                     <span id="move-name-0" class="font-bold">MOV 1</span>
-                    <span class="text-[8px] opacity-90">PP <span id="pp-0">15/15</span></span>
+                    <div class="flex justify-between items-center text-[7px] opacity-90 mt-0.5">
+                        <span>PP <span id="pp-0">15/15</span></span>
+                        <span id="move-fx-0" class="font-bold"></span>
+                    </div>
                 </button>
                 <button onclick="useMove(1)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
                     <span id="move-name-1" class="font-bold">MOV 2</span>
-                    <span class="text-[8px] opacity-90">PP <span id="pp-1">15/15</span></span>
+                    <div class="flex justify-between items-center text-[7px] opacity-90 mt-0.5">
+                        <span>PP <span id="pp-1">15/15</span></span>
+                        <span id="move-fx-1" class="font-bold"></span>
+                    </div>
                 </button>
                 <button onclick="useMove(2)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
                     <span id="move-name-2" class="font-bold">MOV 3</span>
-                    <span class="text-[8px] opacity-90">PP <span id="pp-2">15/15</span></span>
+                    <div class="flex justify-between items-center text-[7px] opacity-90 mt-0.5">
+                        <span>PP <span id="pp-2">15/15</span></span>
+                        <span id="move-fx-2" class="font-bold"></span>
+                    </div>
                 </button>
                 <button onclick="useMove(3)" class="p-2 bg-slate-800 border-2 rounded text-left text-[9px] active:translate-y-0.5 flex flex-col justify-between">
                     <span id="move-name-3" class="font-bold">MOV 4</span>
-                    <span class="text-[8px] opacity-90">PP <span id="pp-3">15/15</span></span>
+                    <div class="flex justify-between items-center text-[7px] opacity-90 mt-0.5">
+                        <span>PP <span id="pp-3">15/15</span></span>
+                        <span id="move-fx-3" class="font-bold"></span>
+                    </div>
                 </button>
                 <button onclick="backToMain()" class="col-span-2 py-1.5 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
                     ↩️ VOLVER
                 </button>
             </div>
 
-            <!-- SUB-MENÚ CAMBIAR POKÉMON EN BATALLA -->
             <div id="switch-menu" class="hidden grid-cols-3 gap-1.5 mt-2"></div>
 
-            <!-- SUB-MENÚ MOCHILA -->
             <div id="bag-menu" class="hidden flex-col gap-2 mt-2">
                 <div class="flex gap-2">
                     <button onclick="usePotionItem()" class="flex-grow p-2 bg-slate-800 border-2 border-amber-400 text-amber-300 text-[9px] rounded text-left flex justify-between items-center">
-                        <span>🧪 HIPERPOCIÓN</span>
+                        <span>🧪 CURA TOTAL + 60 PS</span>
                         <span>x<span id="potion-count">3</span></span>
                     </button>
                     <button onclick="backToMain()" class="px-3 py-2 bg-slate-800 border-2 border-slate-600 text-red-400 text-[9px] font-bold rounded">
@@ -335,7 +321,6 @@
                 </div>
             </div>
 
-            <!-- MENÚ INICIAL VACÍO -->
             <div id="empty-menu" class="flex justify-center items-center mt-2">
                 <span class="text-[9px] text-amber-300 animate-pulse">¡Elige a tus 6 Pokémon para desbloquear el combate!</span>
             </div>
@@ -344,10 +329,9 @@
 
     </div>
 
-    <!-- SCRIPT PRINCIPAL Y DE AUDIO -->
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        let bgmInterval = null;
+        let bgmTimeout = null;
         let currentStep = 0;
         let isPlaying = false;
         let currentTrack = 'menu';
@@ -427,56 +411,73 @@
             return 1.0;
         }
 
-        const F = {
-            D4: 293.66, DSharp4: 311.13, E4: 329.63, F4: 349.23, FSharp4: 369.99,
-            G4: 392.00, A4: 440.00, ASharp4: 466.16, B4: 493.88, C5: 523.25,
-            D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880.00
+        const N = {
+            REST: 0,
+            C3: 130.81, CSharp3: 138.59, D3: 146.83, DSharp3: 155.56, E3: 164.81, F3: 174.61, FSharp3: 185.00, G3: 196.00, GSharp3: 207.65, A3: 220.00, ASharp3: 233.08, B3: 246.94,
+            C4: 261.63, CSharp4: 277.18, D4: 293.66, DSharp4: 311.13, E4: 329.63, F4: 349.23, FSharp4: 369.99, G4: 392.00, GSharp4: 415.30, A4: 440.00, ASharp4: 466.16, B4: 493.88,
+            C5: 523.25, CSharp5: 554.37, D5: 587.33, DSharp5: 622.25, E5: 659.25, F5: 698.46, FSharp5: 739.99, G5: 783.99, GSharp5: 830.61, A5: 880.00, ASharp5: 932.33, B5: 987.77
         };
 
-        const MENU_NOTES = [
-            { note: F.E4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.A4, mult: 2 }, 
-            { note: F.B4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.G4, mult: 1 }, { note: F.E4, mult: 1 },
-            { note: F.G4, mult: 1 }, { note: F.A4, mult: 1 }, { note: F.B4, mult: 2 }
+        const BATTLE_MELODY = [
+            { note: N.E5, dur: 1 }, { note: N.DSharp5, dur: 1 }, { note: N.D5, dur: 1 }, { note: N.CSharp5, dur: 1 },
+            { note: N.C5, dur: 1 }, { note: N.B4, dur: 1 }, { note: N.ASharp4, dur: 1 }, { note: N.A4, dur: 1 },
+            { note: N.GSharp4, dur: 1 }, { note: N.G4, dur: 1 }, { note: N.FSharp4, dur: 1 }, { note: N.F4, dur: 1 },
+            { note: N.E4, dur: 2 }, { note: N.G4, dur: 2 }, { note: N.B4, dur: 2 }, { note: N.E5, dur: 2 },
+            { note: N.E5, dur: 2 }, { note: N.REST, dur: 1 }, { note: N.E5, dur: 1 }, { note: N.B4, dur: 2 }, { note: N.E5, dur: 2 },
+            { note: N.G5, dur: 2 }, { note: N.FSharp5, dur: 2 }, { note: N.E5, dur: 4 },
+            { note: N.D5, dur: 2 }, { note: N.FSharp5, dur: 2 }, { note: N.A5, dur: 4 },
+            { note: N.G5, dur: 2 }, { note: N.FSharp5, dur: 2 }, { note: N.E5, dur: 4 },
+            { note: N.B5, dur: 4 }, { note: N.A5, dur: 2 }, { note: N.G5, dur: 2 },
+            { note: N.FSharp5, dur: 2 }, { note: N.G5, dur: 2 }, { note: N.A5, dur: 4 },
+            { note: N.G5, dur: 2 }, { note: N.FSharp5, dur: 2 }, { note: N.E5, dur: 2 }, { note: N.D5, dur: 2 },
+            { note: N.E5, dur: 6 }, { note: N.REST, dur: 2 }
         ];
-        const BATTLE_NOTES = [
-            { note: F.G4, mult: 1 }, { note: F.FSharp4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.E4, mult: 1 }, 
-            { note: F.DSharp4, mult: 1 }, { note: F.D4, mult: 1 }, { note: F.DSharp4, mult: 1 }
+
+        const MENU_MELODY = [
+            { note: N.C4, dur: 4 }, { note: N.G4, dur: 4 }, { note: N.C5, dur: 4 }, { note: N.E5, dur: 4 },
+            { note: N.D5, dur: 2 }, { note: N.C5, dur: 2 }, { note: N.B4, dur: 4 }, { note: N.G4, dur: 4 },
+            { note: N.A4, dur: 4 }, { note: N.C5, dur: 4 }, { note: N.G4, dur: 8 }
         ];
-        const VICTORY_NOTES = [
-            { note: F.A4, mult: 1 }, { note: F.F4, mult: 1 }, { note: F.C5, mult: 1 }, { note: F.ASharp4, mult: 2 }
+
+        const VICTORY_MELODY = [
+            { note: N.C5, dur: 2 }, { note: N.C5, dur: 2 }, { note: N.C5, dur: 2 }, { note: N.C5, dur: 4 },
+            { note: N.G4, dur: 4 }, { note: N.A4, dur: 4 }, { note: N.C5, dur: 6 }, { note: N.REST, dur: 2 }
         ];
 
         function playNoteStep() {
             if (!isPlaying) return;
             if (audioCtx.state === 'suspended') audioCtx.resume();
-            let playlist = MENU_NOTES;
-            if (currentTrack === 'battle') playlist = BATTLE_NOTES;
-            if (currentTrack === 'victory') playlist = VICTORY_NOTES;
+
+            let playlist = MENU_MELODY;
+            let baseStepTime = 110;
+
+            if (currentTrack === 'battle') {
+                playlist = BATTLE_MELODY;
+                baseStepTime = 65;
+            } else if (currentTrack === 'victory') {
+                playlist = VICTORY_MELODY;
+                baseStepTime = 90;
+            }
 
             const item = playlist[currentStep % playlist.length];
             const now = audioCtx.currentTime;
-            const baseTime = (currentTrack === 'battle') ? (60 / 170 / 2) : (currentTrack === 'victory' ? (60 / 145 / 2) : (60 / 133 / 2));
-            const duration = baseTime * item.mult;
+            const durationInSeconds = (baseStepTime * item.dur) / 1000;
 
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            if (item.note !== N.REST) {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(item.note, now);
+                gain.gain.setValueAtTime(0.09, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + (durationInSeconds * 0.92));
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + durationInSeconds);
+            }
 
-            osc.type = (currentTrack === 'battle') ? 'sawtooth' : 'square';
-            osc.frequency.setValueAtTime(item.note, now);
-            gain.gain.setValueAtTime(0.05, now);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + (duration * 0.95));
-
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start(now);
-            osc.stop(now + duration);
             currentStep++;
-        }
-
-        function getIntervalByTrack() {
-            if (currentTrack === 'battle') return (60000 / 170 / 2); 
-            if (currentTrack === 'victory') return (60000 / 145 / 2);
-            return (60000 / 133 / 2);
+            bgmTimeout = setTimeout(playNoteStep, baseStepTime * item.dur);
         }
 
         function toggleMusic() {
@@ -484,12 +485,12 @@
             const btn = document.getElementById('bgm-toggle');
             if (isPlaying) {
                 isPlaying = false;
-                clearInterval(bgmInterval);
+                clearTimeout(bgmTimeout);
                 if (btn) btn.innerText = "🎵 MÚSICA: OFF";
             } else {
                 isPlaying = true;
                 currentStep = 0;
-                bgmInterval = setInterval(playNoteStep, getIntervalByTrack());
+                playNoteStep();
                 if (btn) btn.innerText = "⏸️ MÚSICA: ON";
             }
         }
@@ -498,8 +499,8 @@
             currentTrack = mode;
             currentStep = 0;
             if (isPlaying) {
-                clearInterval(bgmInterval);
-                bgmInterval = setInterval(playNoteStep, getIntervalByTrack());
+                clearTimeout(bgmTimeout);
+                playNoteStep();
             }
         }
 
@@ -535,6 +536,15 @@
                 gain.gain.linearRampToValueAtTime(0.01, now + 0.3);
                 osc.start(now);
                 osc.stop(now + 0.3);
+            } else if (type === 'status') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(450, now);
+                osc.frequency.linearRampToValueAtTime(250, now + 0.2);
+                osc.frequency.linearRampToValueAtTime(550, now + 0.4);
+                gain.gain.setValueAtTime(0.18, now);
+                gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
             } else if (type === 'click') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(600, now);
@@ -543,6 +553,21 @@
                 osc.start(now);
                 osc.stop(now + 0.04);
             }
+        }
+
+        // ASIGNACIÓN DE EFECTOS DE ESTADO POR NOMBRE DE MOVIMIENTO
+        function getMoveStatusEffect(moveName, type) {
+            const name = moveName.toUpperCase();
+            if (name.includes("TRUENO") || name.includes("RAYO") || name.includes("VOLTIOCAMBIO")) {
+                return { status: 'PAR', chance: 0.35 };
+            }
+            if (name.includes("TÓXICO") || name.includes("LODAZAL") || name.includes("VEN") || name.includes("VENENO")) {
+                return { status: 'ENV', chance: 0.40 };
+            }
+            if (name.includes("PSÍQUICO") || name.includes("LETARGO") || name.includes("BESO") || name.includes("HIPNOSIS") || name.includes("SOMNÍFERO") || name.includes("GIGADRENADO")) {
+                return { status: 'DOR', chance: 0.35 };
+            }
+            return null;
         }
 
         const RAW_POKEDEX = [
@@ -630,6 +655,8 @@
                 type: raw.type,
                 hp: 150,
                 maxHp: 150,
+                status: null, // 'PAR', 'ENV', 'DOR'
+                sleepTurns: 0,
                 spriteBack: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/back/${raw.id}.gif`,
                 spriteFront: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${raw.id}.gif`,
                 moves: raw.m.map((moveName, i) => ({
@@ -638,7 +665,8 @@
                     power: 45 + (i * 10),
                     accuracy: 0.95 - (i * 0.02),
                     pp: 15 - (i * 2),
-                    maxPp: 15 - (i * 2)
+                    maxPp: 15 - (i * 2),
+                    effect: getMoveStatusEffect(moveName, raw.type)
                 }))
             };
         }
@@ -830,29 +858,15 @@
             pCurr.moves.forEach((m, idx) => {
                 document.getElementById(`move-name-${idx}`).innerText = m.name;
                 document.getElementById(`pp-${idx}`).innerText = `${m.pp}/${m.maxPp}`;
+                const fxEl = document.getElementById(`move-fx-${idx}`);
+                if (m.effect) {
+                    if (m.effect.status === 'PAR') { fxEl.innerText = "⚡PAR"; fxEl.className = "text-amber-400 font-bold"; }
+                    else if (m.effect.status === 'ENV') { fxEl.innerText = "☠️ENV"; fxEl.className = "text-purple-400 font-bold"; }
+                    else if (m.effect.status === 'DOR') { fxEl.innerText = "💤DOR"; fxEl.className = "text-sky-400 font-bold"; }
+                } else {
+                    fxEl.innerText = "";
+                }
             });
-        }
-
-        function returnToSelection() {
-            if (gameState.isBusy) return;
-            playRetroSFX('click');
-            setTrackMode('menu');
-
-            document.getElementById('enemy-sprite-box').style.opacity = '0';
-            document.getElementById('player-sprite-box').style.opacity = '0';
-            document.getElementById('enemy-card').style.opacity = '0';
-            document.getElementById('player-card').style.opacity = '0';
-            document.getElementById('vs-intro-overlay').classList.add('hidden');
-
-            document.getElementById('battle-screen').classList.add('hidden');
-            document.getElementById('main-menu').classList.remove('grid');
-            document.getElementById('main-menu').classList.add('hidden');
-            document.getElementById('moves-menu').classList.add('hidden');
-            document.getElementById('switch-menu').classList.add('hidden');
-            document.getElementById('bag-menu').classList.add('hidden');
-            document.getElementById('empty-menu').classList.remove('hidden');
-            document.getElementById('selection-screen').classList.remove('hidden');
-            typeWriter("¡Selecciona 6 Pokémon para combatir!");
         }
 
         function typeWriter(text) {
@@ -875,7 +889,6 @@
             if (gameState.isBusy) return;
             playRetroSFX('click');
             refreshMoveButtons();
-            document.getElementById('main-menu').classList.remove('hidden'); // Asegurar visibilidad general
             document.getElementById('main-menu').classList.add('hidden');
             document.getElementById('moves-menu').classList.remove('hidden');
             document.getElementById('moves-menu').classList.add('grid');
@@ -937,7 +950,6 @@
             playRetroSFX('heal');
             await new Promise(r => setTimeout(r, 600));
 
-            // CORRECCIÓN: Al cambiar de Pokémon de forma táctica, ahora se regresa al menú principal limpio en lugar de activar un ataque libre al rival
             backToMain();
             await typeWriter(`¿Qué debería hacer ${newPkmn.name}?`);
             gameState.isBusy = false;
@@ -956,7 +968,6 @@
             document.getElementById('moves-menu').classList.add('hidden');
             document.getElementById('switch-menu').classList.add('hidden');
             document.getElementById('bag-menu').classList.add('hidden');
-            // CORRECCIÓN: Forzar siempre a mostrar el menú principal con grid correctamente
             const mainMenu = document.getElementById('main-menu');
             mainMenu.classList.remove('hidden');
             mainMenu.classList.add('grid');
@@ -981,6 +992,19 @@
             });
         }
 
+        function renderStatusBadge(elementId, status) {
+            const badge = document.getElementById(elementId);
+            if (!status) {
+                badge.classList.add('hidden');
+                return;
+            }
+            badge.classList.remove('hidden');
+            badge.innerText = status;
+            if (status === 'PAR') badge.className = "px-1 py-0.5 text-[7px] font-black rounded text-slate-950 bg-amber-400";
+            else if (status === 'ENV') badge.className = "px-1 py-0.5 text-[7px] font-black rounded text-white bg-purple-600";
+            else if (status === 'DOR') badge.className = "px-1 py-0.5 text-[7px] font-black rounded text-white bg-sky-500";
+        }
+
         function updateUI() {
             const pCurr = gameState.playerTeam[gameState.playerIndex];
             const eCurr = gameState.enemyTeam[gameState.enemyIndex];
@@ -992,12 +1016,14 @@
             playerBar.style.width = pPct + '%';
             updateHPBarColor(playerBar, pPct);
             document.getElementById('player-hp-text').innerText = `${pCurr.hp}/150`;
+            renderStatusBadge('player-status-badge', pCurr.status);
             
             const ePct = Math.max(0, (eCurr.hp / 150) * 100);
             const enemyBar = document.getElementById('enemy-hp-bar');
             enemyBar.style.width = ePct + '%';
             updateHPBarColor(enemyBar, ePct);
             document.getElementById('enemy-hp-text').innerText = `${eCurr.hp}/150`;
+            renderStatusBadge('enemy-status-badge', eCurr.status);
 
             document.getElementById('potion-count').innerText = pCurr.potions;
 
@@ -1011,6 +1037,74 @@
             pop.classList.remove('damage-pop-text');
             void pop.offsetWidth;
             pop.classList.add('damage-pop-text');
+        }
+
+        // APLICAR ESTADO ALTERADO AL OBJETIVO
+        async function tryApplyStatus(target, effect) {
+            if (!effect || target.status || target.hp <= 0) return;
+            if (Math.random() <= effect.chance) {
+                target.status = effect.status;
+                playRetroSFX('status');
+                updateUI();
+                if (effect.status === 'PAR') {
+                    await typeWriter(`¡${target.name} quedó paralizado! ⚡`);
+                } else if (effect.status === 'ENV') {
+                    await typeWriter(`¡${target.name} ha sido envenenado! ☠️`);
+                } else if (effect.status === 'DOR') {
+                    target.sleepTurns = Math.floor(Math.random() * 2) + 1;
+                    await typeWriter(`¡${target.name} se quedó profundamente dormido! 💤`);
+                }
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+
+        // COMPROBAR SI EL POKÉMON PUEDE MOVERSE ESTE TURNO
+        async function canPokemonAct(pkmn) {
+            if (pkmn.status === 'DOR') {
+                if (pkmn.sleepTurns > 0) {
+                    pkmn.sleepTurns--;
+                    await typeWriter(`¡${pkmn.name} está dormido como un tronco! 💤`);
+                    await new Promise(r => setTimeout(r, 600));
+                    return false;
+                } else {
+                    pkmn.status = null;
+                    updateUI();
+                    await typeWriter(`¡${pkmn.name} se despertó! ☀️`);
+                    await new Promise(r => setTimeout(r, 500));
+                }
+            }
+            if (pkmn.status === 'PAR') {
+                if (Math.random() < 0.35) {
+                    await typeWriter(`¡${pkmn.name} está paralizado y no se puede mover! ⚡`);
+                    await new Promise(r => setTimeout(r, 600));
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // DAÑO POR VENENO AL FINAL DEL TURNO
+        async function processEndOfTurnPoison() {
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+
+            if (pCurr.hp > 0 && pCurr.status === 'ENV') {
+                pCurr.hp = Math.max(0, pCurr.hp - 15);
+                playRetroSFX('status');
+                popDamageText('player', '-15 ENV');
+                updateUI();
+                await typeWriter(`¡${pCurr.name} sufre daño por el veneno! ☠️`);
+                await new Promise(r => setTimeout(r, 600));
+            }
+
+            if (eCurr.hp > 0 && eCurr.status === 'ENV') {
+                eCurr.hp = Math.max(0, eCurr.hp - 15);
+                playRetroSFX('status');
+                popDamageText('enemy', '-15 ENV');
+                updateUI();
+                await typeWriter(`¡El ${eCurr.name} enemigo sufre daño por el veneno! ☠️`);
+                await new Promise(r => setTimeout(r, 600));
+            }
         }
 
         function chooseEnemyMove() {
@@ -1055,9 +1149,17 @@
             }
 
             gameState.isBusy = true;
-            move.pp--;
             backToMain();
 
+            // Verificar parálisis o sueño del jugador antes de atacar
+            const canAct = await canPokemonAct(pCurr);
+            if (!canAct) {
+                await new Promise(r => setTimeout(r, 500));
+                await handleEnemyTurn();
+                return;
+            }
+
+            move.pp--;
             await typeWriter(`¡${pCurr.name} usó ${move.name}!`);
 
             const playerSprite = document.getElementById('player-sprite');
@@ -1088,105 +1190,128 @@
 
                     if (mult > 1.0) await typeWriter("¡Es súper eficaz! 💥");
                     else if (mult < 1.0) await typeWriter("No es muy eficaz... 🛡️");
+
+                    // Intentar aplicar efecto secundario de estado
+                    await tryApplyStatus(eCurr, move.effect);
                 }
 
                 if (eCurr.hp <= 0) {
-                    await new Promise(r => setTimeout(r, 400));
-                    await typeWriter(`¡El ${eCurr.name} enemigo se debilitó!`);
-                    document.getElementById('enemy-sprite-box').style.opacity = '0';
-
-                    const nextEnemyIdx = gameState.enemyTeam.findIndex(p => p.hp > 0);
-                    if (nextEnemyIdx === -1) {
-                        setTrackMode('victory');
-                        await typeWriter("¡Has derrotado a todos los Pokémon del rival! ¡VICTORIA! 🏆");
-                        return;
-                    } else {
-                        gameState.enemyIndex = nextEnemyIdx;
-                        const newEnemy = gameState.enemyTeam[gameState.enemyIndex];
-                        await typeWriter(`¡El rival envió a ${newEnemy.name}!`);
-                        document.getElementById('enemy-sprite').src = newEnemy.spriteFront;
-                        document.getElementById('enemy-name').innerText = newEnemy.name;
-                        updateUI();
-
-                        const ballEnemy = document.getElementById('throw-pokeball-enemy');
-                        ballEnemy.classList.add('anim-pokeball');
-                        await new Promise(r => setTimeout(r, 350));
-                        ballEnemy.classList.remove('anim-pokeball');
-
-                        document.getElementById('enemy-sprite-box').style.opacity = '1';
-                        playRetroSFX('hit');
-                        await new Promise(r => setTimeout(r, 600));
-                        backToMain();
-                        await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
-                        gameState.isBusy = false;
-                        return;
-                    }
+                    await handleEnemyFainted();
+                    return;
                 }
             } else {
                 await typeWriter(`¡El ataque de ${pCurr.name} falló!`);
             }
 
-            await new Promise(r => setTimeout(r, 800));
+            await new Promise(r => setTimeout(r, 600));
             await handleEnemyTurn();
+        }
+
+        async function handleEnemyFainted() {
+            const pCurr = gameState.playerTeam[gameState.playerIndex];
+            const eCurr = gameState.enemyTeam[gameState.enemyIndex];
+            await new Promise(r => setTimeout(r, 400));
+            await typeWriter(`¡El ${eCurr.name} enemigo se debilitó!`);
+            document.getElementById('enemy-sprite-box').style.opacity = '0';
+
+            const nextEnemyIdx = gameState.enemyTeam.findIndex(p => p.hp > 0);
+            if (nextEnemyIdx === -1) {
+                setTrackMode('victory');
+                await typeWriter("¡Has derrotado a todos los Pokémon del rival! ¡VICTORIA! 🏆");
+            } else {
+                gameState.enemyIndex = nextEnemyIdx;
+                const newEnemy = gameState.enemyTeam[gameState.enemyIndex];
+                await typeWriter(`¡El rival envió a ${newEnemy.name}!`);
+                document.getElementById('enemy-sprite').src = newEnemy.spriteFront;
+                document.getElementById('enemy-name').innerText = newEnemy.name;
+                updateUI();
+
+                const ballEnemy = document.getElementById('throw-pokeball-enemy');
+                ballEnemy.classList.add('anim-pokeball');
+                await new Promise(r => setTimeout(r, 350));
+                ballEnemy.classList.remove('anim-pokeball');
+
+                document.getElementById('enemy-sprite-box').style.opacity = '1';
+                playRetroSFX('hit');
+                await new Promise(r => setTimeout(r, 600));
+                backToMain();
+                await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
+                gameState.isBusy = false;
+            }
         }
 
         async function handleEnemyTurn() {
             const eCurr = gameState.enemyTeam[gameState.enemyIndex];
             const pCurr = gameState.playerTeam[gameState.playerIndex];
 
-            const enemyMove = chooseEnemyMove();
-            await typeWriter(`¡El ${eCurr.name} enemigo usó ${enemyMove.name}!`);
+            const canEnemyAct = await canPokemonAct(eCurr);
+            if (canEnemyAct) {
+                const enemyMove = chooseEnemyMove();
+                await typeWriter(`¡El ${eCurr.name} enemigo usó ${enemyMove.name}!`);
 
-            const enemySprite = document.getElementById('enemy-sprite');
-            enemySprite.classList.add('anim-attack-enemy');
-            await new Promise(r => setTimeout(r, 250));
-            enemySprite.classList.remove('anim-attack-enemy');
+                const enemySprite = document.getElementById('enemy-sprite');
+                enemySprite.classList.add('anim-attack-enemy');
+                await new Promise(r => setTimeout(r, 250));
+                enemySprite.classList.remove('anim-attack-enemy');
 
-            if (Math.random() <= enemyMove.accuracy) {
-                const eMult = getEffectiveness(enemyMove.type, pCurr.type);
-                const eRawDmg = enemyMove.power + Math.floor(Math.random() * 6);
-                const enemyDmg = Math.floor(eRawDmg * eMult);
+                if (Math.random() <= enemyMove.accuracy) {
+                    const eMult = getEffectiveness(enemyMove.type, pCurr.type);
+                    const eRawDmg = enemyMove.power + Math.floor(Math.random() * 6);
+                    const enemyDmg = Math.floor(eRawDmg * eMult);
 
-                if (eMult === 0) {
-                    await typeWriter(`¡No afecta a ${pCurr.name}! 🚫`);
-                } else {
-                    pCurr.hp = Math.max(0, pCurr.hp - enemyDmg);
-                    if (eMult > 1.0) playRetroSFX('super-effective');
-                    else playRetroSFX('hit');
-
-                    popDamageText('player', `-${enemyDmg}`);
-                    const playerSprite = document.getElementById('player-sprite');
-                    playerSprite.classList.add('anim-damage');
-                    updateUI();
-                    await new Promise(r => setTimeout(r, 400));
-                    playerSprite.classList.remove('anim-damage');
-
-                    if (eMult > 1.0) await typeWriter("¡Es súper eficaz contra ti! 💥");
-                    else if (eMult < 1.0) await typeWriter("No fue muy eficaz... 🛡️");
-                }
-
-                if (pCurr.hp <= 0) {
-                    await new Promise(r => setTimeout(r, 400));
-                    await typeWriter(`¡${pCurr.name} se debilitó!`);
-                    document.getElementById('player-sprite-box').style.opacity = '0';
-
-                    const hasAlive = gameState.playerTeam.some(p => p.hp > 0);
-                    if (!hasAlive) {
-                        setTrackMode('victory');
-                        await typeWriter("¡Todos tus Pokémon se debilitaron! Has perdido el combate... 💀");
-                        return;
+                    if (eMult === 0) {
+                        await typeWriter(`¡No afecta a ${pCurr.name}! 🚫`);
                     } else {
-                        await typeWriter("Elige a tu siguiente Pokémon para enviar al combate.");
-                        openSwitchMenu();
-                        gameState.isBusy = false;
-                        return;
+                        pCurr.hp = Math.max(0, pCurr.hp - enemyDmg);
+                        if (eMult > 1.0) playRetroSFX('super-effective');
+                        else playRetroSFX('hit');
+
+                        popDamageText('player', `-${enemyDmg}`);
+                        const playerSprite = document.getElementById('player-sprite');
+                        playerSprite.classList.add('anim-damage');
+                        updateUI();
+                        await new Promise(r => setTimeout(r, 400));
+                        playerSprite.classList.remove('anim-damage');
+
+                        if (eMult > 1.0) await typeWriter("¡Es súper eficaz contra ti! 💥");
+                        else if (eMult < 1.0) await typeWriter("No fue muy eficaz... 🛡️");
+
+                        await tryApplyStatus(pCurr, enemyMove.effect);
                     }
+                } else {
+                    await typeWriter(`¡El ataque de ${eCurr.name} falló!`);
                 }
-            } else {
-                await typeWriter(`¡El ataque de ${eCurr.name} falló!`);
             }
 
-            await new Promise(r => setTimeout(r, 600));
+            // Daño residual por envenenamiento al finalizar la ronda
+            await processEndOfTurnPoison();
+
+            // Comprobar si el rival cayó por veneno
+            if (eCurr.hp <= 0) {
+                await handleEnemyFainted();
+                return;
+            }
+
+            // Comprobar si el jugador cayó por ataque o veneno
+            if (pCurr.hp <= 0) {
+                await new Promise(r => setTimeout(r, 400));
+                await typeWriter(`¡${pCurr.name} se debilitó!`);
+                document.getElementById('player-sprite-box').style.opacity = '0';
+
+                const hasAlive = gameState.playerTeam.some(p => p.hp > 0);
+                if (!hasAlive) {
+                    setTrackMode('victory');
+                    await typeWriter("¡Todos tus Pokémon se debilitaron! Has perdido el combate... 💀");
+                    return;
+                } else {
+                    await typeWriter("Elige a tu siguiente Pokémon para enviar al combate.");
+                    openSwitchMenu();
+                    gameState.isBusy = false;
+                    return;
+                }
+            }
+
+            await new Promise(r => setTimeout(r, 500));
             backToMain();
             await typeWriter(`¿Qué debería hacer ${pCurr.name}?`);
             gameState.isBusy = false;
@@ -1196,20 +1321,22 @@
             if (gameState.isBusy) return;
             const pCurr = gameState.playerTeam[gameState.playerIndex];
             if (pCurr.potions <= 0) {
-                await typeWriter("¡No quedan Hiperpociones!");
+                await typeWriter("¡No quedan objetos en la mochila!");
                 return;
             }
 
             gameState.isBusy = true;
             pCurr.potions--;
             pCurr.hp = Math.min(150, pCurr.hp + 60);
+            pCurr.status = null; // Cura también cualquier estado alterado
+            pCurr.sleepTurns = 0;
 
             backToMain();
             playRetroSFX('heal');
             updateUI();
-            await typeWriter(`¡Usaste HIPERPOCIÓN! Restauraste PS a ${pCurr.name}.`);
+            await typeWriter(`¡Usaste CURA TOTAL + 60 PS en ${pCurr.name}! ✨`);
 
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 900));
             await handleEnemyTurn();
         }
 
